@@ -10,7 +10,9 @@ account_urls = patterns('',
 )
 
 urlpatterns = patterns('',
-    url(r'^$', IndexView.as_view(), name='home'),
-    url(r'users', include(account_urls)),
+    #url(r'^$', IndexView.as_view(), name='home'),
+    url(r'^api/v1/users', include(account_urls)),
+    url(r'^api/v1/auth/login/$', 'rest_framework_jwt.views.obtain_jwt_token'),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'.*', IndexView.as_view(), name='home'), #I wonder if this is the best way to do it
 )

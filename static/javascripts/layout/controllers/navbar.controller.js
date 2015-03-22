@@ -12,7 +12,6 @@
 
     function NavbarController($scope){
         var vm = this;
-        vm.kalle = 'kalle';
-
+        this.sanityCheck = "NavbarController working";
     }
 }());

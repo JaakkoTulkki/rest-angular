@@ -10,14 +10,20 @@
       <a class="navbar-brand" href="/">Kehko</a>
     </div> <!-- ./navbar-header -->
 
+  <!--
+  REMEMBER TO USE {% verbatim %} {% endverbatim %} tags
+  where you include angular
+
+  -->
     <div class="collapse navbar-collapse" id="kehko-nav">
       <ul class="nav navbar-nav pull-right">
+      {% verbatim %} {{ vm.sanityCheck }} {% endverbatim %}
         {% if user.is_authenticated %}
           <li><a href="/+{{ user.username }}">+{{ user.username }}</a></li>
           <li><a href="/+{{ user.username }}/settings">Settings</a></li>
           <li><a href="javascript:void(0)" ng-click="vm.logout()">Logout</a></li>
         {% else %}
-          <li><a href="/login">Login</a></li>
+          <li><a href="/login">Login or {{ kalle }}</a></li>
           <li><a href="/register">Register</a></li>
         {% endif %}
       </ul>
