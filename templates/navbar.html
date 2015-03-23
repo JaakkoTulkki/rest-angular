@@ -17,15 +17,19 @@
   -->
     <div class="collapse navbar-collapse" id="kehko-nav">
       <ul class="nav navbar-nav pull-right">
-      {% verbatim %} {{ vm.sanityCheck }} {% endverbatim %}
-        {% if user.is_authenticated %}
-          <li><a href="/+{{ user.username }}">+{{ user.username }}</a></li>
-          <li><a href="/+{{ user.username }}/settings">Settings</a></li>
+      {% verbatim %}
+          is logged in = {{ vm.loggedIn }},
+        <span ng-show="vm.loggedIn">
           <li><a href="javascript:void(0)" ng-click="vm.logout()">Logout</a></li>
-        {% else %}
-          <li><a href="/login">Login or {{ kalle }}</a></li>
-          <li><a href="/register">Register</a></li>
-        {% endif %}
+            <li>username = {{ vm.username }}</li>
+        </span>
+
+        <span ng-hide="vm.loggedIn">
+            <li><a href="/login">Login</a></li>
+            <li><a href="/register">Register</a></li>
+        </span>
+
+      {% endverbatim %}
       </ul>
     </div> <!-- /.collapse.navbar-collapse -->
   </div> <!-- /.container-fluid -->

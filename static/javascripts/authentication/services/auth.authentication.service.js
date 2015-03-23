@@ -4,8 +4,9 @@
         .factory('Authentication', ['$http', 'SERVER', '$window', function($http, SERVER, $window){
             var factory = {};
 
-            factory.deleteToken = function () {
+            factory.deleteLocalStorage = function () {
                 $window.localStorage.removeItem('token');
+                $window.localStorage.removeItem('username');
             };
 
             factory.getToken = function () {
@@ -32,17 +33,22 @@
                 }
             };
 
+            factory.logout = function () {
+                factory.deleteLocalStorage();
+            };
+
 
             factory.register = function(email, username, password, confirm_password){
                 console.log('authentication function');
-                $http.post(SERVER.url+'/api/v1/accounts/', {
+                $http.post(SERVER.url+'/api/v1/users/', {
                     username: username,
                     password: password,
                     confirm_password: confirm_password,
                     email: email
-                }).then(registerSuccessFn, registerErrorFn);
+                }).then(registerSuccessFn(email, password), registerErrorFn);
 
                 function registerSuccessFn(){
+                    console.log('success at register');
                     factory.login(email, password);
                 }
                 function registerErrorFn(){
@@ -52,6 +58,18 @@
 
             factory.setToken = function (token) {
                 $window.localStorage.setItem('token', token);
+            };
+
+            factory.parseJWT = function () {
+                var token = factory.getToken();
+                if(token){
+                    var base64Url = token.split('.')[1];
+                    var base64 = base64Url.replace('-', '+').replace('_', '/');
+                    var claims = JSON.parse($window.atob(base64));
+                    return claims;
+                } else {
+                    return {username: ''};
+                }
             };
 
 

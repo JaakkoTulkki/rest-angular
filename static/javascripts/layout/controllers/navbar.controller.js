@@ -8,10 +8,15 @@
         .module('kehko')
         .controller('NavbarController', NavbarController);
 
-    NavbarController.$inject = ['$scope'];
+    NavbarController.$inject = ['$scope', 'User'];
 
-    function NavbarController($scope){
+    function NavbarController($scope, User){
         var vm = this;
-        this.sanityCheck = "NavbarController working";
+        this.loggedIn = User.loggedIn();
+        this.logout = function () {
+            User.logout();
+            this.loggedIn = false;
+        };
+        this.username = User.getUsername();
     }
 }());

@@ -1,0 +1,31 @@
+email, username, password, confirm_password
+
+<form ng-submit="submitForm(email, password)">
+    <div class="list">
+      <label class="item item-input">
+        <input type="email" ng-model="email" placeholder="Your email address">
+      </label>
+    </div>
+
+    <div class="list">
+      <label class="item item-input">
+        <input type="text" ng-model="username" placeholder="Username">
+      </label>
+    </div>
+
+    <div class="list">
+      <label class="item item-input">
+        <input type="password" ng-model="password" placeholder="Password">
+      </label>
+    </div>
+
+    <div class="list">
+      <label class="item item-input">
+        <input type="password" ng-model="confirm_password" placeholder="Confirm password">
+      </label>
+    </div>
+
+    <div class="padding">
+      <button type="submit" class="button button-block button-positive">Log in</button>
+    </div>
+</form>

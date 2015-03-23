@@ -9,6 +9,10 @@
                      controller: 'LoginCtrl',
                      templateUrl: '/static/templates/authentication/login.html'
                  })
+                 .when('/register', {
+                     controller: 'RegisterCtrl',
+                     templateUrl: '/static/templates/authentication/register.html'
+                 })
                  .otherwise('/');
         }])
 }());

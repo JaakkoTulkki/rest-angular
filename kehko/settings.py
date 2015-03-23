@@ -16,7 +16,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 import datetime
 
 AUTH_USER_MODEL = 'authentication.Account'
-CORS_ORIGIN_ALLOW_ALL = True  # allow from every domain
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
