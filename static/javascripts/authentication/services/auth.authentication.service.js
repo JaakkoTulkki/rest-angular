@@ -18,18 +18,20 @@
                 return $http.post(SERVER.url+'/api/v1/auth/login/', {
                     email: email,
                     password: password
-                }).then(loginSuccessFn, loginErrorFn);
+                }).success(loginSuccessFn).error(loginErrorFn);
 
                 function loginSuccessFn(data, status, headers, config){
                     //$http.defaults.headers.common.Authorization = 'JWT ' + data.data.token;
                     //console.log($http.defaults.headers.common.Authorization);
-                    factory.setToken(data.data.token);
+                    console.log('dataaa ');
+                    console.log(data);
+                    factory.setToken(data.token);
                     //hard refresh
                     window.location = "/";
 
                 }
                 function loginErrorFn(data, status, headers, config){
-                    alert('  Nope. Wrong password/email combination.');
+                    alert('Nope. Wrong password/email combination.');
                 }
             };
 
@@ -39,13 +41,12 @@
 
 
             factory.register = function(email, username, password, confirm_password){
-                console.log('authentication function');
                 $http.post(SERVER.url+'/api/v1/users/', {
                     username: username,
                     password: password,
                     confirm_password: confirm_password,
                     email: email
-                }).then(registerSuccessFn(email, password), registerErrorFn);
+                }).then(registerSuccessFn, registerErrorFn);
 
                 function registerSuccessFn(){
                     console.log('success at register');
