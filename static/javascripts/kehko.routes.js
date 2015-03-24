@@ -5,6 +5,10 @@
              controller: 'IndexController',
              templateUrl: '/static/templates/layout/index.html'
             })
+                 .when('/account',{
+                     controller: 'AccountCtrl',
+                     templateUrl: '/static/templates/account/account-index.html'
+                 })
                  .when('/login', {
                      controller: 'LoginCtrl',
                      templateUrl: '/static/templates/authentication/login.html'

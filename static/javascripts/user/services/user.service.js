@@ -4,7 +4,8 @@
             function($http, $window, SERVER, Authentication){
             factory = {
                 username: '',
-                listUsers: []
+                listUsers: [],
+                details: {}
             };
 
             factory.getUsers = function () {
@@ -27,12 +28,26 @@
             factory.getUsername = function () {
                 username = $window.localStorage.getItem('username');
                 if(username){
-                    return username.username;
+                    return username;
                 } else if(factory.loggedIn()){
                     var claims = factory.getClaims;
                     var username = claims.username;
                     $window.localStorage.setItem('username', username);
                     return username;
+                }
+            };
+
+            factory.getUserDetails = function () {
+                $http.get(SERVER.url + '/api/v1/users/jaakko/')
+                    .then(successFn, errorFn);
+                function successFn(data){
+                    console.log('we are in success');
+                    console.log(data);
+                    factory.details = data;
+                }
+
+                function errorFn(){
+                    console.log('error');
                 }
             };
 

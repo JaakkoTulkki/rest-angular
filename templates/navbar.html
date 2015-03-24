@@ -20,6 +20,7 @@
       {% verbatim %}
           is logged in = {{ vm.loggedIn }},
         <span ng-show="vm.loggedIn">
+            <li><a href="/account">Your Account</a></li>
           <li><a href="javascript:void(0)" ng-click="vm.logout()">Logout</a></li>
             <li>username = {{ vm.username }}</li>
         </span>

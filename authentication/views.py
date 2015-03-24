@@ -2,6 +2,7 @@ from rest_framework import generics, permissions
 from rest_framework import status
 from rest_framework.response import Response
 
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from authentication.serializers import AccountSerializer
 from authentication.models import Account
@@ -29,3 +30,13 @@ class AccountList(generics.ListCreateAPIView):
             'status': "Bad request",
             'message': 'Account could not be created'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+class AccountDetail(generics.RetrieveUpdateAPIView):
+    model = Account
+    serializer_class = AccountSerializer
+    lookup_field = 'username'
+    #permission_classes = (permissions.IsAdminUser,)
+    authentication_classes = (JSONWebTokenAuthentication, )
+    def get_queryset(self):
+        print(self.request.user)
+        return Account.objects.filter(username=self.kwargs.get('username'))
