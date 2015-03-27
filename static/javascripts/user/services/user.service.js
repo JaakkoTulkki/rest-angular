@@ -38,8 +38,8 @@
             };
 
             factory.getUserDetails = function () {
-                $http.get(SERVER.url + '/api/v1/users/jaakko/')
-                    .then(successFn, errorFn);
+                return $http.get(SERVER.url + '/api/v1/users/' + factory.getUsername() +'/')
+                    .success(successFn).error(errorFn);
                 function successFn(data){
                     console.log('we are in success');
                     console.log(data);

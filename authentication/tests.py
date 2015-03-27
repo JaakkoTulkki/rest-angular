@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.core.urlresolvers import reverse
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework import status
@@ -105,3 +106,22 @@ class TestAccountList(APITestCase):
         self.assertEquals(response.status_code, 200)
 
 class TestAccoundDetail(APITestCase):
+    def setUp(self):
+        factory = APIRequestFactory()
+        #set up normal user and token
+        self.normal_user = Account.objects.create_user(email="user@kehko.com", username="useri", password="man")
+        request = factory.post('/api/v1/auth/login/', {'email': 'user@kehko.com', 'password': 'man'})
+        response = obtain_jwt_token(request)
+        self.normal_token = response.data['token']
+
+    def test_details(self):
+        factory = APIRequestFactory()
+        view = AccountDetail.as_view()
+
+        #unauthenticated
+        url = reverse('account-detail', kwargs={'username': 'useri'})
+        print('url = ', url)
+        request = factory.get(url)
+        response = view(request)
+        #self.assertEqual(response.status_code, 0)
+

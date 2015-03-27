@@ -52,8 +52,8 @@ class AccountDetail(generics.RetrieveUpdateAPIView):
     model = Account
     serializer_class = AccountSerializer
     lookup_field = 'username'
-    permission_classes = (IsAccountOwner(),)
-    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (permissions.AllowAny,)
+    #authentication_classes = (JSONWebTokenAuthentication, )
     def get_queryset(self):
         print(self.request.user)
         return Account.objects.filter(username=self.kwargs.get('username'))
