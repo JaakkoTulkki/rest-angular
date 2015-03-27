@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
-from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
+from rest_framework.test import APIClient, APIRequestFactory, APITestCase, force_authenticate
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework import status
+
 
 from authentication.models import Account
 from authentication.views import AccountDetail, AccountList
@@ -60,16 +61,14 @@ class TestAccountList(APITestCase):
         """
         everyone can create a new user
         """
-
         factory = APIRequestFactory()
         view = AccountList.as_view()
-        ok_request = factory.post('/api/v1/users/', {'email': "new@kehko.com",
-                                                  'username': "newkehko", 'password': 'pass'})
+        ok_request = factory.post('/api/v1/users/', {'email': "anew@kehko.com", 'username': "kana", 'password': 'pass'})
         response = view(ok_request)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         #now incomplete data
-        bad_request = factory.post('/api/v1/users/', {'email': "new@kehko.com",'password': 'pass'})
+        bad_request = factory.post('/api/v1/users/', {'email': "new@kehko.com", 'password': 'pass'})
         response = view(bad_request)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -87,7 +86,7 @@ class TestAccountList(APITestCase):
         #unauthenticated
         unauth_req = factory.get('/api/v1/users/')
         response = view(unauth_req)
-        self.assertEquals(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         #authenticated but not admin
         user = self.normal_user
@@ -105,23 +104,36 @@ class TestAccountList(APITestCase):
         self.assertTrue(response.data[0]['id']==1)
         self.assertEquals(response.status_code, 200)
 
-class TestAccoundDetail(APITestCase):
+class TestAccountDetail(APITestCase):
     def setUp(self):
         factory = APIRequestFactory()
         #set up normal user and token
-        self.normal_user = Account.objects.create_user(email="user@kehko.com", username="useri", password="man")
+        self.normal_user = Account.objects.create_user(email="user@kehko.com", username="accountDetail", password="man")
         request = factory.post('/api/v1/auth/login/', {'email': 'user@kehko.com', 'password': 'man'})
         response = obtain_jwt_token(request)
         self.normal_token = response.data['token']
 
-    def test_details(self):
-        factory = APIRequestFactory()
-        view = AccountDetail.as_view()
+        self.user2 = Account.objects.create_user(email="user2@kehko.com", username="hello", password="man")
+        request = factory.post('/api/v1/auth/login/', {'email': 'user2@kehko.com', 'password': 'man'})
+        response = obtain_jwt_token(request)
+        self.token2 = response.data['token']
 
+    def test_details(self):
         #unauthenticated
-        url = reverse('account-detail', kwargs={'username': 'useri'})
-        print('url = ', url)
-        request = factory.get(url)
-        response = view(request)
-        #self.assertEqual(response.status_code, 0)
+        client = APIClient()
+        response = client.get('/api/v1/users/accountDetail/')
+        self.assertEqual(response.status_code, 401)
+
+        #authenticated but, not account owner
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token2)
+        response = client.get('/api/v1/users/accountDetail/')
+        self.assertEqual(response.status_code, 403)
+        client.credentials()
+
+        #authenticated and the account owner
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.normal_token)
+        response = client.get('/api/v1/users/accountDetail/')
+        self.assertEqual(response.status_code, 200)
 
