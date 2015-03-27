@@ -10,7 +10,10 @@
             };
 
             factory.getToken = function () {
-                return $window.localStorage.getItem('token');
+                console.log('getting token');
+                var token = $window.localStorage.getItem('token');
+                console.log('token', token);
+                return token;
             };
 
             factory.login = function (email, password) {

@@ -1,11 +1,28 @@
 from rest_framework import generics, permissions
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from authentication.serializers import AccountSerializer
 from authentication.models import Account
+
+
+from kehko.general_permissions import IsAccountOwner
+class RestrictedView(APIView):
+    permission_classes = (permissions.IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get(self, request):
+        #print(request.META['Authorization'])
+        data = {
+        'id': request.user.id,
+        'username': request.user.username,
+        'token': str(request.auth)
+        }
+        return Response(data)
+
 
 class AccountList(generics.ListCreateAPIView):
     model = Account
@@ -15,7 +32,7 @@ class AccountList(generics.ListCreateAPIView):
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
             #allow only authenticated user
-            return (permissions.AllowAny(),)
+            return (permissions.IsAuthenticated(), permissions.IsAdminUser())
         if self.request.method == 'POST':
             return (permissions.AllowAny(),)
 
@@ -35,7 +52,7 @@ class AccountDetail(generics.RetrieveUpdateAPIView):
     model = Account
     serializer_class = AccountSerializer
     lookup_field = 'username'
-    #permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsAccountOwner(),)
     authentication_classes = (JSONWebTokenAuthentication, )
     def get_queryset(self):
         print(self.request.user)

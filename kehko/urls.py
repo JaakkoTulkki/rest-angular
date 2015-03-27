@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from kehko.views import IndexView
-from authentication.views import AccountList, AccountDetail
+from authentication.views import AccountList, AccountDetail, RestrictedView
 from campaigns.views import CampaignList
 from companies.views import CompanyList, ProductList
 from values.views import ValueList
@@ -34,5 +34,6 @@ urlpatterns = patterns('',
     url(r'^api/v1/values', include(value_urls)),
     url(r'^api/v1/auth/login/$', 'rest_framework_jwt.views.obtain_jwt_token'),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^restricted/$', RestrictedView.as_view()),  #for testing purposes
     url(r'.*', IndexView.as_view(), name='home'), #I wonder if this is the best way to do it
 )

@@ -9,7 +9,6 @@
                     var Reg = $injector.get('Authentication');
                     //see if we have token
                     var token = Reg.getToken();
-
                     //if we have it, put it in the headers
                     //if not, well, don't do anything and the ajax call will respond with 403 Permission Denied
                     if (token) {
@@ -29,6 +28,7 @@
                         //then redirect to login
                         $location.path('/login');
                     }
+
                     return response;
                 }
             };
