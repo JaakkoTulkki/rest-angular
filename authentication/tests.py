@@ -119,6 +119,12 @@ class TestAccountDetail(APITestCase):
         self.token2 = response.data['token']
 
     def test_details(self):
+        """
+        tests whether you can see account details
+        only authenticated user should get this data
+        :return:
+        """
+
         #unauthenticated
         client = APIClient()
         response = client.get('/api/v1/users/accountDetail/')
@@ -136,4 +142,37 @@ class TestAccountDetail(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.normal_token)
         response = client.get('/api/v1/users/accountDetail/')
         self.assertEqual(response.status_code, 200)
+
+    def test_update_account(self):
+        """
+        try to test whether you can update your account
+        :return:
+        """
+        data = {'first_name': 'Fname', 'last_name': 'Lname', 'tagline': 'Life', 'password': 'man'}
+        #wrong account, user2 tries to update normal users's account
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token2)
+        response = client.put('/api/v1/users/accountDetail/', data)
+        self.assertEqual(response.status_code, 403)
+
+        #right account, normal user trie to update but with missing data
+        data = {'first_name': 'Fname', 'last_name': 'Lname', 'tagline': 'Life', }
+        user = self.normal_user
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.normal_token)
+        response = client.put('/api/v1/users/accountDetail/', data)
+        self.assertEqual(response.status_code, 403)
+
+        #right account, normal user updates with complete data
+        data = {'first_name': 'Fname', 'last_name': 'Lname', 'tagline': 'Life', 'password': 'man'}
+        user = self.normal_user
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.normal_token)
+        response = client.put('/api/v1/users/accountDetail/', data)
+        print(response.data)
+        self.assertEqual(response.status_code, 204)
+
+        #make sure that the stuff was updated
+        response = client.get('/api/v1/users/accountDetail/')
+        self.assertEqual(response.data['tagline'], 'Life')
 

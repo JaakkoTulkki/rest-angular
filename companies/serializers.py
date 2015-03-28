@@ -15,7 +15,8 @@ class CompanySerializer(serializers.ModelSerializer):
     following_user = AccountSerializer(many=True)
     class Meta:
         model = Company
-        fields = ('account_owner', 'full_name', 'slug', 'following_company', 'following_user', 'likes', 'values')
+        fields = ('account_owner', 'full_name', 'slug', 'following_company', 'following_user',
+                  'following_campaign' 'likes', 'values')
 
 
 class ProductSerializer(serializers.ModelSerializer):

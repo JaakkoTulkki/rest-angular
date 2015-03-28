@@ -57,35 +57,30 @@ class AccountDetail(generics.RetrieveUpdateAPIView):
     model = Account
     serializer_class = AccountSerializer
     lookup_field = 'username'
-    permission_classes = (IsAccountOwner,)#(IsAccountOwner, permissions.IsAdminUser)
+    permission_classes = (IsAccountOwner, permissions.IsAuthenticated) #(permissions.AllowAny,)
     authentication_classes = (JSONWebTokenAuthentication, )
     def get_queryset(self):
         return Account.objects.filter(username=self.kwargs.get('username'))
 
     def update(self, request, username=None):
-        user = Account.objects.get(pk=1)
+        obj = Account.objects.get(username=username)
+        self.check_object_permissions(request, obj)
+        user = request.user
         data = request.data
-        pwd = request.data['password']
-        data['password'] = pwd
-        data['confirm_password'] = pwd
-        print('user ', user)
-        if user.check_password(pwd) and user.username == username:
-            serializer = self.serializer_class(user, data=request.data)
+        pwd = request.data.get('password', '')
+        if user.check_password(pwd) and request.user == obj:
+            serializer = self.serializer_class(user, data=data, partial=True)
             if serializer.is_valid():
                 serializer.update(user, serializer.validated_data)
-                user.set_password(pwd)
-                user.save()
-                update_session_auth_hash(request, user)
-                del serializer.validated_data['password']
-                del serializer.validated_data['confirm_password']
-                return Response(serializer.validated_data, status=status.HTTP_204_NO_CONTENT)
+                user_obj = self.serializer_class(user)
+                return Response(user_obj.data, status=status.HTTP_204_NO_CONTENT)
             else:
                 return Response({
                     'status': "400",
-                    'message': 'Your account could not be updated'
+                    'message': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
         return Response({
-            'status': "Authetication failed",
+            'status': "Authentication failed",
             'message': 'Account could not be updated'
         }, status=status.HTTP_403_FORBIDDEN)
 

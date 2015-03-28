@@ -6,7 +6,7 @@ class Company(models.Model):
     slug = models.SlugField(unique=True)
     following_company = models.ManyToManyField('self', related_name='comp_followees', symmetrical=False)
     following_user = models.ManyToManyField('authentication.Account', related_name='user_followees', symmetrical=False)
-    following_campaign = models.ManyToManyField('campaigns.Campaign', related_name='camp_followees', symmetrical=False)
+    following_campaign = models.ManyToManyField('causes.Cause', related_name='cause_followees', symmetrical=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
