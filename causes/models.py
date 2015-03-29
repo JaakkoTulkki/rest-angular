@@ -6,16 +6,16 @@ from django.db import models
 class Cause(models.Model):
     creator = models.ForeignKey('authentication.Account')
     name = models.CharField(max_length=100)
-    sponsors = models.ManyToManyField('companies.Company')
+    #sponsors = models.ManyToManyField('companies.Company')
     slug = models.SlugField(unique=True)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    values = models.ManyToManyField('values.Value')
+    #values = models.ManyToManyField('values.Value')
     url = models.URLField(blank=True, null=True)
     likes = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
-    followers = models.ManyToManyField('authentication.Account', related_name='cause_following')
+    #followers = models.ManyToManyField('authentication.Account', related_name='cause_following')
 
 class CauseMembers(models.Model):
     """

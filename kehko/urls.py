@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from kehko.views import IndexView
 from authentication.views import AccountList, AccountDetail, RestrictedView
-from campaigns.views import CampaignList
+from causes.views import CauseList
 from companies.views import CompanyList, ProductList
 from values.views import ValueList
 
@@ -13,7 +13,7 @@ account_urls = patterns('',
 )
 
 campaign_urls = patterns('',
-    url(r'^/$', CampaignList.as_view(), name='campaign-list'),
+    url(r'^/$', CauseList.as_view(), name='campaign-list'),
 )
 
 company_urls = patterns('',
@@ -28,7 +28,7 @@ value_urls = patterns('',
 
 urlpatterns = patterns('',
     #url(r'^$', IndexView.as_view(), name='home'),
-    url(r'^api/v1/campaigns', include(campaign_urls)),
+    url(r'^api/v1/causes', include(campaign_urls)),
     url(r'^api/v1/companies', include(company_urls)),
     url(r'^api/v1/users', include(account_urls)),
     url(r'^api/v1/values', include(value_urls)),

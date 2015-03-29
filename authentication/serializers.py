@@ -21,3 +21,4 @@ class AccountSerializer(serializers.ModelSerializer):
         instance.tagline = validated_data.get('tagline', instance.tagline)
         instance.save()
         return instance
+
