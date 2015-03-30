@@ -14,13 +14,14 @@ class CauseMemberSerializer(serializers.ModelSerializer):
 
 class CauseSerializer(serializers.ModelSerializer):
     creator = AccountSerializer()
-    #sponsors = CompanySerializer(many=True, required=False)
-    #values = ValueSerializer(many=True, required=False)
-    #followers = AccountSerializer(many=True, required=False)
-    #members = CauseMemberSerializer(many=True, required=False)
+    sponsors = CompanySerializer(many=True, required=False)
+    values = ValueSerializer(many=True, required=False)
+    followers = AccountSerializer(many=True, required=False)
+    members = CauseMemberSerializer(many=True, required=False)
     class Meta:
         model = Cause
-        fields = ('creator', 'name', 'slug', 'description',)
+        fields = ('creator', 'name', 'slug', 'description','sponsors', 'values',
+                  'followers', 'members',)
 
     def create(self, validated_data):
         creator = validated_data['creator']
@@ -32,4 +33,10 @@ class CauseSerializer(serializers.ModelSerializer):
         return cause
 
     def update(self, instance, validated_data):
+        instance.creator = validated_data.get('creator', instance.creator)
+        instance.sponsors = validated_data.get('sponsors')
+        instance.name = validated_data.get('name', instance.name)
+        instance.slug = validated_data.get('slug', instance.slug)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
         return instance

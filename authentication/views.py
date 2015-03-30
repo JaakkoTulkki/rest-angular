@@ -42,7 +42,7 @@ class AccountList(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            Account.objects.create_user(**serializer.validated_data)
+            serializer.save()
             return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
         return Response({
             'status': "Bad request",

@@ -8,6 +8,7 @@ from authentication.serializers import AccountSerializer
 from authentication.models import Account
 from causes.models import Cause, CauseMembers
 from causes.serializers import CauseSerializer, CauseMemberSerializer
+from kehko.general_permissions import IsAccountOwner
 
 class CauseList(generics.ListCreateAPIView):
     model = Cause
@@ -23,12 +24,12 @@ class CauseList(generics.ListCreateAPIView):
         else:
             return (permissions.IsAuthenticated(), permissions.IsAdminUser())
 
+
     def create(self, request, *args, **kwargs):
         data = request.data
         user = request.user
         serializer = CauseSerializer(data=data, partial=True)
         if serializer.is_valid():
-            print('tyyppi ', type(user))
             serializer.save(creator=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
@@ -36,3 +37,31 @@ class CauseList(generics.ListCreateAPIView):
                     'status': "400",
                     'message': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
+
+class CauseDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = Cause
+    serializer_class = CauseSerializer
+    lookup_field = 'slug'
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (permissions.AllowAny(), )
+        else:
+            return (permissions.IsAdminUser(), )
+
+    def get_queryset(self):
+        return Cause.objects.filter(slug=self.kwargs.get('slug'))
+
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        queryset = self.get_queryset()[0]
+        serializer = CauseSerializer(queryset, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save(creator=user)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({
+                'status': "400",
+                'message': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)

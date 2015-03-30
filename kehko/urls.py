@@ -3,8 +3,8 @@ from django.contrib import admin
 
 from kehko.views import IndexView
 from authentication.views import AccountList, AccountDetail, RestrictedView
-from causes.views import CauseList
-from companies.views import CompanyList, ProductList
+from causes.views import CauseList, CauseDetail
+from companies.views import CompanyList, CompanyDetail, ProductList
 from values.views import ValueList
 
 account_urls = patterns('',
@@ -12,24 +12,29 @@ account_urls = patterns('',
     url(r'^/$', AccountList.as_view(), name='account-list')
 )
 
-campaign_urls = patterns('',
+cause_urls = patterns('',
+    url(r'^/(?P<slug>[0-9a-zA-Z_-]+)/$', CauseDetail.as_view(), name='campaign-detail'),
     url(r'^/$', CauseList.as_view(), name='campaign-list'),
 )
 
 company_urls = patterns('',
     url(r'^/$', CompanyList.as_view(), name='company-list'),
-    url(r'/products/$', ProductList.as_view(), name='product-list')
+    url(r'^/(?P<slug>[0-9a-zA-Z_-]+)/$', CompanyDetail.as_view(), name='company-detail'),
+)
+
+product_urls = patterns('',
+    url(r'/$', ProductList.as_view(), name='product-list')
 )
 
 value_urls = patterns('',
     url(r'^/$', ValueList.as_view(), name='value-list'),
 )
 
-
 urlpatterns = patterns('',
     #url(r'^$', IndexView.as_view(), name='home'),
-    url(r'^api/v1/causes', include(campaign_urls)),
+    url(r'^api/v1/causes', include(cause_urls)),
     url(r'^api/v1/companies', include(company_urls)),
+    url(r'^api/v1/products', include(product_urls)),
     url(r'^api/v1/users', include(account_urls)),
     url(r'^api/v1/values', include(value_urls)),
     url(r'^api/v1/auth/login/$', 'rest_framework_jwt.views.obtain_jwt_token'),
