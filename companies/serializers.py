@@ -16,6 +16,7 @@ class CompanySerializer(serializers.ModelSerializer):
                                                             view_name='company-detail',
                                                             queryset=Company.objects.all())
     following_user = AccountSerializer(many=True)
+    account_owner = AccountSerializer()
     class Meta:
         model = Company
         fields = ('account_owner', 'full_name', 'slug', 'following_company', 'following_user',
@@ -39,6 +40,25 @@ class CompanySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     values = ValueSerializer(many=True, required=False)
+    owner = CompanySerializer()
     class Meta:
         model = Product
         fields = ('owner', 'name', 'slug', 'description', 'price', 'values')
+
+    def create(self, validated_data):
+        owner = validated_data['owner']
+        name = validated_data['name']
+        slug = validated_data['slug']
+        description = validated_data['description']
+        price = validated_data['price']
+        product = Product(owner=owner, name=name, slug=slug, description=description, price=price)
+        product.save()
+        return product
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.slug = validated_data.get('slug', instance.slug)
+        instance.description = validated_data.get('description', instance.description)
+        instance.price = validated_data.get('price', instance.price)
+        instance.save()
+        return instance

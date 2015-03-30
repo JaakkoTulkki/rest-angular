@@ -4,7 +4,7 @@ from django.contrib import admin
 from kehko.views import IndexView
 from authentication.views import AccountList, AccountDetail, RestrictedView
 from causes.views import CauseList, CauseDetail
-from companies.views import CompanyList, CompanyDetail, ProductList
+from companies.views import CompanyList, CompanyDetail, ProductList, ProductDetail
 from values.views import ValueList
 
 account_urls = patterns('',
@@ -23,7 +23,8 @@ company_urls = patterns('',
 )
 
 product_urls = patterns('',
-    url(r'/$', ProductList.as_view(), name='product-list')
+    url(r'^/(?P<company>[0-9a-zA-Z_-]+)/$', ProductList.as_view(), name='product-list'),
+    url(r'^/(?P<company>[0-9a-zA-Z_-]+)/(?P<product>[0-9a-zA-Z_-]+)/$', ProductDetail.as_view(), name='product-detail')
 )
 
 value_urls = patterns('',

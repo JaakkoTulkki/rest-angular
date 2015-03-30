@@ -58,7 +58,64 @@ class CompanyDetail(generics.RetrieveUpdateDestroyAPIView):
                 'message': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
-class ProductList(generics.ListAPIView):
+class ProductList(generics.ListCreateAPIView):
     model = Product
     serializer_class = ProductSerializer
-    queryset = Product.objects.all()
+    #queryset = Product.objects.all()
+    authentication_classes = (JSONWebTokenAuthentication, )
+    lookup_field = 'owner'
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (permissions.AllowAny(), )
+        else:
+            return (permissions.IsAdminUser(), )
+
+    def get_queryset(self):
+        return Product.objects.filter(owner__slug=self.kwargs.get('company'))
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, partial=True)
+        if serializer.is_valid():
+            corp = Company.objects.get(slug=kwargs.get('company'))
+            serializer.save(owner=corp)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({
+            'status': "Bad request",
+            'message': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = Product
+    serializer_class = ProductSerializer
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (permissions.AllowAny(), )
+        else:
+            return (permissions.IsAdminUser(), )
+
+    def get_queryset(self):
+        return Product.objects.filter(owner__slug=self.kwargs.get('company'), slug=self.kwargs.get('product'))
+
+    def delete(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        queryset.delete()
+        return Response({
+            'status': "205",
+            'message': "Object deleted"
+            }, status=status.HTTP_204_NO_CONTENT
+        )
+
+    def update(self, request, *args, **kwargs):
+        queryset = self.get_queryset()[0]
+        serializer = ProductSerializer(queryset, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({
+                'status': "400",
+                'message': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)

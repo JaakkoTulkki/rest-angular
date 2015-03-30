@@ -24,6 +24,18 @@ class TestCause(APITestCase):
         response = obtain_jwt_token(request)
         self.super_token = response.data['token']
 
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
+        data = {'full_name': 'Test Company', 'slug': 'test-company'}
+        response = client.post('/api/v1/companies/', data)
+        self.assertEqual(response.status_code, 201)
+        self.company = Company.objects.get(full_name="Test Company")
+        #another company
+        data = {'full_name': 'Mokia', 'slug': 'mokia'}
+        response = client.post('/api/v1/companies/', data)
+        self.assertEqual(response.status_code, 201)
+        self.company = Company.objects.get(full_name="Mokia")
+
     def test_company(self):
         client = APIClient()
 
@@ -47,8 +59,7 @@ class TestCause(APITestCase):
         client.credentials()
         response = client.get('/api/v1/companies/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['full_name'], "Corp")
+        self.assertEqual(response.data[-1]['full_name'], "Corp")
 
         #now try to retrieve the company info from CompanyDetail view
         response = client.get('/api/v1/companies/corp/')
@@ -91,4 +102,71 @@ class TestCause(APITestCase):
         self.assertFalse(company.exists())
 
     def test_product(self):
-        pass
+        client = APIClient()
+        data = {'name': "Soap", 'slug': 'soap', 'description': "Keeps you clean",
+                'price': 100}
+
+        #try to create the product as normal user
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
+        response = client.post('/api/v1/products/test-company/', data)
+        self.assertEqual(response.status_code, 403)
+        client.credentials()
+
+        #create  as admin
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
+        response = client.post('/api/v1/products/test-company/', data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['slug'], 'soap')
+        self.assertEqual(response.data['owner']['full_name'], 'Test Company')
+
+        #create another product
+        data = {'name': "Cheese", 'slug': 'cheese', 'description': "This is foo",
+                'price': 10}
+        response = client.post('/api/v1/products/test-company/', data)
+        self.assertEqual(response.status_code, 201)
+
+        #a product for Mokia
+        data = {'name': "Cheese", 'slug': 'mokia-cheese', 'description': "This is foo",
+                'price': 10}
+        response = client.post('/api/v1/products/mokia/', data)
+        self.assertEqual(response.status_code, 201)
+
+        #now list those products for Test Company
+        client.credentials()
+        response = client.get('/api/v1/products/test-company/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0]['name'], 'Soap')
+        self.assertEqual(response.data[1]['name'], 'Cheese')
+        self.assertEqual(response.data[0]['owner']['full_name'], 'Test Company')
+
+        #Now list Mokia products
+        response = client.get('/api/v1/products/mokia/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['owner']['full_name'], 'Mokia')
+
+
+        #let's update some product
+        data = {'name': "Cheese", 'slug': 'cheese', 'description': "This is food and it's good",
+                'price': 12}
+
+        #first as not admin
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
+        response = client.put('/api/v1/products/test-company/cheese/', data)
+        self.assertEqual(response.status_code, 403)
+
+        #now let's update some product as asdmin
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
+        response = client.put('/api/v1/products/test-company/cheese/', data)
+        self.assertEqual(response.status_code, 202)
+        product = Product.objects.get(slug='cheese')
+        self.assertEqual(product.description, "This is food and it's good")
+        self.assertEqual(product.price, 12)
+
+        #now let's delete that product
+        response = client.delete('/api/v1/products/test-company/cheese/')
+        self.assertEqual(response.status_code, 204)
+        product = Product.objects.filter(owner__slug="test-company", slug="cheese")
+        self.assertFalse(product.exists())
+
