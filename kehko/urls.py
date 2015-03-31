@@ -5,7 +5,7 @@ from kehko.views import IndexView
 from authentication.views import AccountList, AccountDetail, RestrictedView
 from causes.views import CauseList, CauseDetail
 from companies.views import CompanyList, CompanyDetail, ProductList, ProductDetail
-from values.views import ValueList
+from values.views import ValueList, ValueDetail
 
 account_urls = patterns('',
     url(r'^/(?P<username>[0-9a-zA-Z_-]+)/$', AccountDetail.as_view(), name='account-detail'),
@@ -29,6 +29,7 @@ product_urls = patterns('',
 
 value_urls = patterns('',
     url(r'^/$', ValueList.as_view(), name='value-list'),
+    url(r'^/(?P<slug>[0-9a-zA-Z_-]+)/$', ValueDetail.as_view(), name='value-detail'),
 )
 
 urlpatterns = patterns('',

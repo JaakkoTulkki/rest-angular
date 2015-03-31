@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils.text import slugify
 # Create your models here.
 
 
@@ -16,6 +16,12 @@ class Cause(models.Model):
     likes = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     followers = models.ManyToManyField('authentication.Account', related_name='cause_following')
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            # Newly created object, so set slug
+            self.slug = slugify(self.name)
+        super(Cause, self).save(*args, **kwargs)
 
 class CauseMembers(models.Model):
     """

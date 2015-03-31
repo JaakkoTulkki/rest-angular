@@ -61,7 +61,6 @@ class CompanyDetail(generics.RetrieveUpdateDestroyAPIView):
 class ProductList(generics.ListCreateAPIView):
     model = Product
     serializer_class = ProductSerializer
-    #queryset = Product.objects.all()
     authentication_classes = (JSONWebTokenAuthentication, )
     lookup_field = 'owner'
 
