@@ -26,15 +26,19 @@ class TestCause(APITestCase):
 
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        data = {'full_name': 'Test Company', 'slug': 'test-company'}
+
+        data = {'full_name': 'Test Company'}
+
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
         self.company = Company.objects.get(full_name="Test Company")
+        self.test_slug = response.data['slug']
         #another company
         data = {'full_name': 'Mokia', 'slug': 'mokia'}
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
         self.company = Company.objects.get(full_name="Mokia")
+        self.mokia_slug = response.data['slug']
 
     def test_company(self):
         client = APIClient()
@@ -65,40 +69,39 @@ class TestCause(APITestCase):
         response = client.get('/api/v1/companies/corp/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['full_name'], "Corp")
+        slug = response.data['slug']
 
         #try to update as normal user
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
         data = {'full_name': 'Corp Ltd.', 'slug': 'corp-ltd'}
-        response = client.put('/api/v1/companies/corp/', data)
+        response = client.put('/api/v1/companies/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 403)
 
         #now update as admin user
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
         data = {'full_name': 'Corp Ltd.', 'slug': 'corp-ltd'}
-        response = client.put('/api/v1/companies/corp/', data)
+        response = client.put('/api/v1/companies/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 202)
         self.assertEqual(response.data['full_name'], "Corp Ltd.")
+        self.assertEqual(response.data['slug'], slug)
 
-        #now the old stuff should have disappeared
-        response = client.get('/api/v1/companies/corp/')
-        self.assertEqual(response.status_code, 404)
-
-        #and the new slug should work -> retrieve
-        response = client.get('/api/v1/companies/corp-ltd/')
+        #the slug should have stayed the same
+        response = client.get('/api/v1/companies/{}/'.format(slug))
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['slug'], slug)
 
         #try to delete as normal user
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
-        response = client.delete('/api/v1/companies/corp-ltd/')
+        response = client.delete('/api/v1/companies/{}/'.format(slug))
         self.assertEqual(response.status_code, 403)
 
         #now delete as admin
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        response = client.delete('/api/v1/companies/corp-ltd/')
+        response = client.delete('/api/v1/companies/{}/'.format(slug))
         self.assertEqual(response.status_code, 204)
 
         #and make sure that it's gone
-        company = Company.objects.filter(slug="corp-ltd")
+        company = Company.objects.filter(slug=slug)
         self.assertFalse(company.exists())
 
     def test_product(self):
@@ -116,19 +119,17 @@ class TestCause(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
         response = client.post('/api/v1/products/test-company/', data)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data['slug'], 'soap')
+        self.assertEqual(response.data['slug'], self.test_slug+'-soap')
         self.assertEqual(response.data['owner']['full_name'], 'Test Company')
 
         #create another product
-        data = {'name': "Cheese", 'slug': 'cheese', 'description': "This is foo",
-                'price': 10}
-        response = client.post('/api/v1/products/test-company/', data)
+        data = {'name': "Cheese",'description': "This is foo", 'price': 10}
+        response = client.post('/api/v1/products/{}/'.format(self.test_slug), data)
         self.assertEqual(response.status_code, 201)
 
         #a product for Mokia
-        data = {'name': "Cheese", 'slug': 'mokia-cheese', 'description': "This is foo",
-                'price': 10}
-        response = client.post('/api/v1/products/mokia/', data)
+        data = {'name': "Cheese", 'description': "This is foo", 'price': 10}
+        response = client.post('/api/v1/products/{}/'.format(self.mokia_slug), data)
         self.assertEqual(response.status_code, 201)
 
         #now list those products for Test Company
@@ -158,15 +159,21 @@ class TestCause(APITestCase):
 
         #now let's update some product as asdmin
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        response = client.put('/api/v1/products/test-company/cheese/', data)
+        response = client.put('/api/v1/products/{0}/{1}/'.format(self.test_slug, self.test_slug+'-cheese'),
+                              data)
         self.assertEqual(response.status_code, 202)
-        product = Product.objects.get(slug='cheese')
+        product = Product.objects.get(slug=self.test_slug+'-cheese')
         self.assertEqual(product.description, "This is food and it's good")
         self.assertEqual(product.price, 12)
 
         #now let's delete that product
-        response = client.delete('/api/v1/products/test-company/cheese/')
+        #but first make sure that there is this kind of product
+        product = Product.objects.filter(owner__slug=self.test_slug, slug=self.test_slug+'-cheese')
+        self.assertTrue(product.exists())
+        #now delete
+        response = client.delete('/api/v1/products/{0}/{1}/'.format(self.test_slug, self.test_slug+'-cheese'))
         self.assertEqual(response.status_code, 204)
-        product = Product.objects.filter(owner__slug="test-company", slug="cheese")
+        #and make sure that the query above return None
+        product = Product.objects.filter(owner__slug=self.test_slug, slug=self.test_slug+'-cheese')
         self.assertFalse(product.exists())
 

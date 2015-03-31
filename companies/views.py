@@ -24,7 +24,7 @@ class CompanyList(generics.ListCreateAPIView):
         serializer = self.serializer_class(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save(account_owner=self.request.user, )
-            return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({
             'status': "Bad request",
             'message': 'Company could not be created'

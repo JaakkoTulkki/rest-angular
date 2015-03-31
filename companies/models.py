@@ -31,5 +31,5 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             # Newly created object, so set slug
-            self.slug = slugify(self.full_name + ' ' +self.name)
+            self.slug = slugify(self.owner.full_name + ' ' +self.name)
         super(Product, self).save(*args, **kwargs)

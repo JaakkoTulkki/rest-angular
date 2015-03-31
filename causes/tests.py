@@ -26,15 +26,14 @@ class TestCause(APITestCase):
         #we are not admin, thus not able to create cause
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
-        #creator', 'name', 'sponsors', 'slug', 'description', 'likes', 'followers', 'members
-        data = {'name': 'NWO', 'slug': 'nwo', 'description': 'NWO awaits!!'}
+        data = {'name': 'NWO', 'description': 'NWO awaits!!'}
         response = client.post('/api/v1/causes/', data)
         self.assertEqual(response.status_code, 403)
 
         #now we are superuser -> should be able to create
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        data = {'name': 'NWO', 'slug': 'nwo', 'description': 'NWO awaits!!'}
+        data = {'name': 'NWO', 'description': 'NWO awaits!!'}
         response = client.post('/api/v1/causes/', data)
         #print(response.__dir__())
         #print(response.serialize())
@@ -47,9 +46,10 @@ class TestCause(APITestCase):
         self.assertEqual(cause.creator, self.cause_man)
 
         #create another cause
-        data = {'name': 'Save Water', 'slug': 'save-water', 'description': 'We are the world!'}
+        data = {'name': 'Save Water', 'description': 'We are the world!'}
         response = client.post('/api/v1/causes/', data)
         self.assertEqual(response.status_code, 201)
+        slug = response.data['slug']
 
         #check that we have two causes
         response = client.get('/api/v1/causes/')
@@ -59,34 +59,28 @@ class TestCause(APITestCase):
         self.assertEqual(response.data[1]['name'], 'Save Water')
 
         #check that details work
-        response = client.get('/api/v1/causes/save-water/')
+        response = client.get('/api/v1/causes/{}/'.format(slug))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['name'], 'Save Water')
 
         #now update with falsy data
         data = {'description': ""}
-        response = client.put('/api/v1/causes/save-water/', data)
+        response = client.put('/api/v1/causes/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 400)
 
         #now update the cause with correct data
-        data = {'name': 'Save Water-Resources', 'slug': 'save-water-resources', 'description': "Where's the justice"}
-        response = client.put('/api/v1/causes/save-water/', data)
+        data = {'name': 'Save Water-Resources', 'description': "Where's the justice"}
+        response = client.put('/api/v1/causes/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 202)
 
-        #check that the new stuff is saved
-        response = client.get('/api/v1/causes/save-water-resources/')
+        #check that the new stuff is saved and the slug is the same!!
+        response = client.get('/api/v1/causes/{}/'.format(slug))
         self.assertEqual(response.status_code, 200)
 
-        #what about the old stuff?
-        #it should no longer exists as the slug has changed
-        #login as unauthenticated user
-        client = APIClient()
-        response = client.get('/api/v1/causes/save-water/')
-        self.assertEqual(response.status_code, 404)
-
-        #should not be able to login
-        data = {'name': 'Save Water-Resources', 'slug': 'save-water-resources', 'description': "Where's the justice"}
-        response = client.put('/api/v1/causes/save-water/', data)
+        #unauthenticated should not be able to login
+        client.credentials()
+        data = {'name': 'Save Water-Resources', 'description': "Where's the justice"}
+        response = client.put('/api/v1/causes/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 401)
         #or delete
         response = client.delete('/api/v1/causes/save-water/', data)
@@ -103,7 +97,7 @@ class TestCause(APITestCase):
         #but deletion should work with admin
         client.credentials()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        response = client.delete('/api/v1/causes/save-water-resources/', data)
+        response = client.delete('/api/v1/causes/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 204)
-        cause = Cause.objects.filter(slug="save-water-resources")
+        cause = Cause.objects.filter(slug=slug)
         self.assertEqual(False, cause.exists())
