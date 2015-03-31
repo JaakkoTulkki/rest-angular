@@ -130,7 +130,7 @@ class TestAccountDetail(APITestCase):
         response = client.get('/api/v1/users/accountDetail/')
         self.assertEqual(response.status_code, 401)
 
-        #authenticated but, not account owner
+        #authenticated but, not account ownger
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token2)
         response = client.get('/api/v1/users/accountDetail/')

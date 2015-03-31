@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-
+from rest_framework.mixins import DestroyModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 
@@ -30,7 +30,8 @@ class CompanyList(generics.ListCreateAPIView):
             'message': 'Company could not be created'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-class CompanyDetail(generics.RetrieveUpdateDestroyAPIView):
+class CompanyDetail(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
+                    generics.GenericAPIView):#generics.RetrieveUpdateDestroyAPIView
     model = Company
     serializer_class = CompanySerializer
     lookup_field = 'slug'
@@ -57,6 +58,26 @@ class CompanyDetail(generics.RetrieveUpdateDestroyAPIView):
                 'status': "400",
                 'message': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, *args, **kwargs):
+        queryset = self.get_queryset()[0]
+        to_be_removed = self.request.DATA['following_company']
+        queryset.following_company.remove(*to_be_removed)
+        queryset.save()
+        serializer = CompanySerializer(queryset, partial=True)
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
 class ProductList(generics.ListCreateAPIView):
     model = Product

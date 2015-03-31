@@ -27,18 +27,24 @@ class TestCause(APITestCase):
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
 
+        #create a company
         data = {'full_name': 'Test Company'}
-
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
         self.company = Company.objects.get(full_name="Test Company")
         self.test_slug = response.data['slug']
         #another company
-        data = {'full_name': 'Mokia', 'slug': 'mokia'}
+        data = {'full_name': 'Mokia'}
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
-        self.company = Company.objects.get(full_name="Mokia")
+        self.mokia = Company.objects.get(full_name="Mokia")
         self.mokia_slug = response.data['slug']
+        #third company
+        data = {'full_name': 'Moke'}
+        response = client.post('/api/v1/companies/', data)
+        self.assertEqual(response.status_code, 201)
+        self.moke = Company.objects.get(full_name="Moke")
+        self.moke_slug = response.data['slug']
 
     def test_company(self):
         client = APIClient()
@@ -177,3 +183,28 @@ class TestCause(APITestCase):
         product = Product.objects.filter(owner__slug=self.test_slug, slug=self.test_slug+'-cheese')
         self.assertFalse(product.exists())
 
+    def test_company_fields(self):
+        client = APIClient()
+        #let's take test_company and add Moke and Mokia to its following-company
+        client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
+        data = {'full_name': 'Kanala', 'following_company': [2, 3]}
+        response = client.put('/api/v1/companies/{}/'.format(self.test_slug), data)
+        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.data['full_name'], 'Kanala')
+        self.assertEqual(response.data['following_company'], [2, 3])
+        #did the update go to db as well?
+        company = Company.objects.get(slug=self.test_slug)
+        self.assertEqual([e.pk for e in company.following_company.all()], [2, 3])
+        #make sure it's not symmetrical
+        company2 = Company.objects.get(pk=2)
+        self.assertTrue(len(company2.following_company.all())==0)
+        self.assertEqual(company2.comp_followees.all()[0], company)
+
+        #let's see if path works!
+        data = {'following_company': [2]}
+        response = client.patch('/api/v1/companies/{}/'.format(self.test_slug), data)
+        self.assertEqual(response.status_code, 202)
+        company = Company.objects.get(slug=self.test_slug)
+        self.assertEqual([e.pk for e in company.following_company.all()], [3])
+        company2 = Company.objects.get(pk=2)
+        self.assertEqual(len(company2.comp_followees.all()), 0)

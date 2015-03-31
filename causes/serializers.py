@@ -34,7 +34,7 @@ class CauseSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.creator = validated_data.get('creator', instance.creator)
-        instance.sponsors = validated_data.get('sponsors')
+        instance.sponsors = validated_data.get('sponsors', instance.sponsors)
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
         instance.save()

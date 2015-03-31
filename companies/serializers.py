@@ -4,17 +4,8 @@ from authentication.serializers import AccountSerializer
 
 from values.serializers import ValueSerializer
 
-"""
-class FollowCompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = ('id', 'full_name')
-"""
 class CompanySerializer(serializers.ModelSerializer):
     values = ValueSerializer(many=True, required=False)
-    following_company = serializers.HyperlinkedRelatedField(many=True,
-                                                            view_name='company-detail',
-                                                            queryset=Company.objects.all())
     following_user = AccountSerializer(many=True)
     account_owner = AccountSerializer()
     class Meta:
@@ -33,6 +24,10 @@ class CompanySerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.account_owner = validated_data.get('account_owner', instance.account_owner)
         instance.full_name = validated_data.get('full_name', instance.full_name)
+        following_company = validated_data.get('following_company')
+        if following_company:
+            instance.save()
+            instance.following_company.add(*following_company)
         instance.save()
         return instance
 
