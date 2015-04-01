@@ -3,6 +3,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework import status
 
 from authentication.models import Account
+from causes.models import Cause
 from companies.models import Company, Product
 from companies.serializers import CompanySerializer, ProductSerializer
 
@@ -28,67 +29,70 @@ class TestCause(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
 
         #create a company
-        data = {'full_name': 'Test Company'}
+        data = {'company_name': 'Test Company'}
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
-        self.company = Company.objects.get(full_name="Test Company")
+        self.company = Company.objects.get(company_name="Test Company")
         self.test_slug = response.data['slug']
         #another company
-        data = {'full_name': 'Mokia'}
+        data = {'company_name': 'Mokia'}
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
-        self.mokia = Company.objects.get(full_name="Mokia")
+        self.mokia = Company.objects.get(company_name="Mokia")
         self.mokia_slug = response.data['slug']
         #third company
-        data = {'full_name': 'Moke'}
+        data = {'company_name': 'Moke'}
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
-        self.moke = Company.objects.get(full_name="Moke")
+        self.moke = Company.objects.get(company_name="Moke")
         self.moke_slug = response.data['slug']
+
+        #create a Cause
+        self.cause = Cause.objects.create(creator=self.cause_man, name="Test cause", description="desc")
 
     def test_company(self):
         client = APIClient()
 
         #try to create a company, not admin
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
-        data = {'full_name': 'Corp', 'slug': 'corp'}
+        data = {'company_name': 'Corp', 'slug': 'corp'}
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 403)
         client.credentials()
 
         #now admin -> should work
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        data = {'full_name': 'Corp', 'slug': 'corp'}
+        data = {'company_name': 'Corp', 'slug': 'corp'}
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
 
-        company = Company.objects.get(full_name="Corp")
-        self.assertEqual(company.full_name, "Corp")
+        company = Company.objects.get(company_name="Corp")
+        self.assertEqual(company.company_name, "Corp")
 
         #make sure that non authenticated users can see the list of companies
         client.credentials()
         response = client.get('/api/v1/companies/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[-1]['full_name'], "Corp")
+        self.assertEqual(response.data[-1]['company_name'], "Corp")
 
         #now try to retrieve the company info from CompanyDetail view
         response = client.get('/api/v1/companies/corp/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['full_name'], "Corp")
+        self.assertEqual(response.data['company_name'], "Corp")
         slug = response.data['slug']
 
         #try to update as normal user
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
-        data = {'full_name': 'Corp Ltd.', 'slug': 'corp-ltd'}
+        data = {'company_name': 'Corp Ltd.', 'slug': 'corp-ltd'}
         response = client.put('/api/v1/companies/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 403)
 
         #now update as admin user
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        data = {'full_name': 'Corp Ltd.', 'slug': 'corp-ltd'}
+        data = {'company_name': 'Corp Ltd.', 'slug': 'corp-ltd'}
         response = client.put('/api/v1/companies/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 202)
-        self.assertEqual(response.data['full_name'], "Corp Ltd.")
+        self.assertEqual(response.data['company_name'], "Corp Ltd.")
         self.assertEqual(response.data['slug'], slug)
 
         #the slug should have stayed the same
@@ -126,7 +130,7 @@ class TestCause(APITestCase):
         response = client.post('/api/v1/products/test-company/', data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['slug'], self.test_slug+'-soap')
-        self.assertEqual(response.data['owner']['full_name'], 'Test Company')
+        self.assertEqual(response.data['owner']['company_name'], 'Test Company')
 
         #create another product
         data = {'name': "Cheese",'description': "This is foo", 'price': 10}
@@ -145,13 +149,13 @@ class TestCause(APITestCase):
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data[0]['name'], 'Soap')
         self.assertEqual(response.data[1]['name'], 'Cheese')
-        self.assertEqual(response.data[0]['owner']['full_name'], 'Test Company')
+        self.assertEqual(response.data[0]['owner']['company_name'], 'Test Company')
 
         #Now list Mokia products
         response = client.get('/api/v1/products/mokia/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['owner']['full_name'], 'Mokia')
+        self.assertEqual(response.data[0]['owner']['company_name'], 'Mokia')
 
 
         #let's update some product
@@ -186,11 +190,17 @@ class TestCause(APITestCase):
     def test_company_fields(self):
         client = APIClient()
         #let's take test_company and add Moke and Mokia to its following-company
+        #also add following_user
+        #and following_cause
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        data = {'full_name': 'Kanala', 'following_company': [2, 3]}
+        data = {'company_name': 'Kanala', 'following_company': [2, 3],
+                'following_user': [1, 2], 'following_cause': [1]
+                }
         response = client.put('/api/v1/companies/{}/'.format(self.test_slug), data)
         self.assertEqual(response.status_code, 202)
-        self.assertEqual(response.data['full_name'], 'Kanala')
+        self.assertEqual(response.data['company_name'], 'Kanala')
+
+        #test that following company went alright
         self.assertEqual(response.data['following_company'], [2, 3])
         #did the update go to db as well?
         company = Company.objects.get(slug=self.test_slug)
@@ -199,6 +209,21 @@ class TestCause(APITestCase):
         company2 = Company.objects.get(pk=2)
         self.assertTrue(len(company2.following_company.all())==0)
         self.assertEqual(company2.comp_followees.all()[0], company)
+
+        #did the following users went allright
+        self.assertEqual(response.data['following_user'], [1, 2])
+        #did the update go to db as well?
+        self.assertEqual([e.pk for e in company.following_user.all()], [1, 2])
+        #make sure it is accessible through related name
+        user1 = Account.objects.get(pk=1)
+        self.assertEqual(len(user1.user_comp_followees.all()), 1)
+
+        #did the following cause went alright?
+        self.assertEqual(response.data['following_cause'], [1])
+        #did the update go to db as well?
+        self.assertEqual(len(company.following_cause.all()), 1)
+        cause = Cause.objects.get(pk=1)
+        self.assertEqual([e.pk for e in cause.cause_comp_followees.all()], [1])
 
         #let's see if path works!
         data = {'following_company': [2]}

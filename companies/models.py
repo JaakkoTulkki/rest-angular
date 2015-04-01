@@ -3,11 +3,11 @@ from django.utils.text import slugify
 
 class Company(models.Model):
     account_owner = models.ForeignKey('authentication.Account')
-    full_name = models.CharField(max_length=100, unique=True)
+    company_name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True)
     following_company = models.ManyToManyField('self', related_name='comp_followees', symmetrical=False, null=True, blank=True)
-    following_user = models.ManyToManyField('authentication.Account', related_name='user_followees', symmetrical=False, null=True, blank=True)
-    following_campaign = models.ManyToManyField('causes.Cause', related_name='cause_followees', symmetrical=False, null=True, blank=True)
+    following_user = models.ManyToManyField('authentication.Account', related_name='user_comp_followees', symmetrical=False, null=True, blank=True)
+    following_cause = models.ManyToManyField('causes.Cause', related_name='cause_comp_followees', symmetrical=False, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -17,7 +17,7 @@ class Company(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             # Newly created object, so set slug
-            self.slug = slugify(self.full_name)
+            self.slug = slugify(self.company_name)
         super(Company, self).save(*args, **kwargs)
 
 class Product(models.Model):
@@ -31,5 +31,5 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             # Newly created object, so set slug
-            self.slug = slugify(self.owner.full_name + ' ' +self.name)
+            self.slug = slugify(self.owner.company_name + ' ' +self.name)
         super(Product, self).save(*args, **kwargs)

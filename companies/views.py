@@ -31,7 +31,7 @@ class CompanyList(generics.ListCreateAPIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 class CompanyDetail(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
-                    generics.GenericAPIView):#generics.RetrieveUpdateDestroyAPIView
+                    generics.GenericAPIView):
     model = Company
     serializer_class = CompanySerializer
     lookup_field = 'slug'

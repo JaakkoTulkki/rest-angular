@@ -6,28 +6,36 @@ from values.serializers import ValueSerializer
 
 class CompanySerializer(serializers.ModelSerializer):
     values = ValueSerializer(many=True, required=False)
-    following_user = AccountSerializer(many=True)
-    account_owner = AccountSerializer()
+    #following_user = AccountSerializer(many=True)
+    #account_owner = AccountSerializer()
     class Meta:
         model = Company
-        fields = ('account_owner', 'full_name', 'slug', 'following_company', 'following_user',
-                  'following_campaign', 'likes', 'values')
+        fields = ('account_owner', 'company_name', 'slug', 'following_company', 'following_user',
+                  'following_cause', 'likes', 'values')
         read_only_fields = ('slug', )
 
     def create(self, validated_data):
         account_owner = validated_data['account_owner']
-        full_name = validated_data['full_name']
-        company = Company(account_owner=account_owner, full_name=full_name)
+        company_name = validated_data['company_name']
+        company = Company(account_owner=account_owner, company_name=company_name)
         company.save()
         return company
 
     def update(self, instance, validated_data):
         instance.account_owner = validated_data.get('account_owner', instance.account_owner)
-        instance.full_name = validated_data.get('full_name', instance.full_name)
+        instance.company_name = validated_data.get('company_name', instance.company_name)
         following_company = validated_data.get('following_company')
         if following_company:
             instance.save()
             instance.following_company.add(*following_company)
+        following_user = validated_data.get('following_user')
+        if following_user:
+            instance.save()
+            instance.following_user.add(*following_user)
+        following_cause = validated_data.get('following_cause')
+        if following_cause:
+            instance.save()
+            instance.following_cause.add(*following_cause)
         instance.save()
         return instance
 
