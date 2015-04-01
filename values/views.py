@@ -9,7 +9,6 @@ from values.models import Value
 class ValueList(generics.ListCreateAPIView):
     model = Value
     serializer_class = ValueSerializer
-    queryset = Value.objects.all()
     authentication_classes = (JSONWebTokenAuthentication, )
 
     def get_permissions(self):
@@ -17,6 +16,14 @@ class ValueList(generics.ListCreateAPIView):
             return (permissions.AllowAny(), )
         else:
             return (permissions.IsAuthenticated(), )
+    def get_queryset(self):
+        queryset = Value.objects.all()
+        ids = self.request.QUERY_PARAMS.get('ids', None)
+        if ids:
+            ids = ids.split(",")
+            ids = [int(id) for id in ids]
+            queryset = queryset.filter(pk__in=ids)
+        return queryset
 
 class ValueDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Value

@@ -29,7 +29,7 @@ class RestrictedView(APIView):
 class AccountList(generics.ListCreateAPIView):
     model = Account
     serializer_class = AccountSerializer
-    queryset = Account.objects.all()
+    #queryset = Account.objects.all()
     authentication_classes = (JSONWebTokenAuthentication, )
 
     def get_permissions(self):
@@ -38,6 +38,17 @@ class AccountList(generics.ListCreateAPIView):
             return (permissions.IsAuthenticated(), permissions.IsAdminUser())
         if self.request.method == 'POST':
             return (permissions.AllowAny(),)
+
+    def get_queryset(self):
+        queryset = Account.objects.all()
+        ids = self.request.QUERY_PARAMS.get('ids', None)
+        if ids:
+            ids = ids.split(",")
+            ids = [int(id) for id in ids]
+            queryset = queryset.filter(pk__in=ids)
+        return queryset
+
+
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)

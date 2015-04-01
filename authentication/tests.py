@@ -57,6 +57,9 @@ class TestAccountList(APITestCase):
         response = obtain_jwt_token(request)
         self.normal_token = response.data['token']
 
+        #create random normal user
+        ac = Account.objects.create(email="random@kehko.com", username="randomkehko", password="pwd")
+
     def test_add_user(self):
         """
         everyone can create a new user
@@ -103,6 +106,14 @@ class TestAccountList(APITestCase):
         #check that the id of the list's first item if 1
         self.assertTrue(response.data[0]['id']==1)
         self.assertEquals(response.status_code, 200)
+
+        #check that you are able to get only certain accouts using pks
+        auth_request = factory.get('/api/v1/users/?ids=1,3')
+        force_authenticate(auth_request, user=user, token=self.super_token)
+        response = view(auth_request)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([e['id'] for e in response.data]), [1, 3])
+
 
 class TestAccountDetail(APITestCase):
     def setUp(self):
@@ -175,4 +186,3 @@ class TestAccountDetail(APITestCase):
         #make sure that the stuff was updated
         response = client.get('/api/v1/users/accountDetail/')
         self.assertEqual(response.data['tagline'], 'Life')
-

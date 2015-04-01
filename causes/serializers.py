@@ -7,20 +7,25 @@ from companies.serializers import CompanySerializer, ProductSerializer
 from values.serializers import ValueSerializer
 
 class CauseMemberSerializer(serializers.ModelSerializer):
-    products = ProductSerializer(many=True, required=False)
     class Meta:
         model = CauseMembers
-        fields = ('company', 'cause', 'products')
+        fields = ('id', 'company', 'cause', 'products',)
+        read_only_fields = ('id', )
+
+    def update(self, instance, validated_data):
+        products = validated_data.get('products')
+        if products:
+            instance.save()
+            instance.products.add(*products)
+        instance.save()
+        return instance
 
 class CauseSerializer(serializers.ModelSerializer):
     creator = AccountSerializer()
-    sponsors = CompanySerializer(many=True, required=False)
-    values = ValueSerializer(many=True, required=False)
-    followers = AccountSerializer(many=True, required=False)
     members = CauseMemberSerializer(many=True, required=False)
     class Meta:
         model = Cause
-        fields = ('creator', 'name', 'slug', 'description','sponsors', 'values',
+        fields = ('id', 'creator', 'name', 'slug', 'description','sponsors', 'values',
                   'followers', 'members',)
         read_only_fields = ('slug',)
 
@@ -34,8 +39,15 @@ class CauseSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.creator = validated_data.get('creator', instance.creator)
-        instance.sponsors = validated_data.get('sponsors', instance.sponsors)
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
+        sponsors = validated_data.get('sponsors')
+        if sponsors:
+            instance.save()
+            instance.sponsors.add(*sponsors)
+        followers = validated_data.get('followers')
+        if followers:
+            instance.save()
+            instance.followers.add(*followers)
         instance.save()
         return instance

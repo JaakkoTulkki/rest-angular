@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from kehko.views import IndexView
 from authentication.views import AccountList, AccountDetail, RestrictedView
-from causes.views import CauseList, CauseDetail
+from causes.views import CauseList, CauseDetail, CauseMemberCreate, CauseMemberUpdate
 from companies.views import CompanyList, CompanyDetail, ProductList, ProductDetail
 from values.views import ValueList, ValueDetail
 
@@ -13,8 +13,13 @@ account_urls = patterns('',
 )
 
 cause_urls = patterns('',
-    url(r'^/(?P<slug>[0-9a-zA-Z_-]+)/$', CauseDetail.as_view(), name='campaign-detail'),
     url(r'^/$', CauseList.as_view(), name='campaign-list'),
+    url(r'^/(?P<slug>[0-9a-zA-Z_-]+)/$', CauseDetail.as_view(), name='campaign-detail'),
+)
+
+cause_member_urls = patterns('',
+    url(r'^/(?P<pk>[0-9]+)/$', CauseMemberUpdate.as_view(), name='causemember-update'),
+    url(r'^/$', CauseMemberCreate.as_view(), name='causemember-create'),
 )
 
 company_urls = patterns('',
@@ -35,6 +40,7 @@ value_urls = patterns('',
 urlpatterns = patterns('',
     #url(r'^$', IndexView.as_view(), name='home'),
     url(r'^api/v1/causes', include(cause_urls)),
+    url(r'^api/v1/cause-members', include(cause_member_urls)),
     url(r'^api/v1/companies', include(company_urls)),
     url(r'^api/v1/products', include(product_urls)),
     url(r'^api/v1/users', include(account_urls)),

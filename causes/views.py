@@ -13,7 +13,6 @@ from kehko.general_permissions import IsAccountOwner
 class CauseList(generics.ListCreateAPIView):
     model = Cause
     serializer_class = CauseSerializer
-    queryset = Cause.objects.all()
     authentication_classes = (JSONWebTokenAuthentication, )
 
     def get_permissions(self):
@@ -24,6 +23,14 @@ class CauseList(generics.ListCreateAPIView):
         else:
             return (permissions.IsAuthenticated(), permissions.IsAdminUser())
 
+    def get_queryset(self):
+        queryset = Cause.objects.all()
+        ids = self.request.QUERY_PARAMS.get('ids', None)
+        if ids:
+            ids = ids.split(",")
+            ids = [int(id) for id in ids]
+            queryset = queryset.filter(pk__in=ids)
+        return queryset
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -65,3 +72,25 @@ class CauseDetail(generics.RetrieveUpdateDestroyAPIView):
                 'status': "400",
                 'message': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
+
+class CauseMemberCreate(generics.ListCreateAPIView):
+    model = CauseMembers
+    serializer_class = CauseMemberSerializer
+    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def get_queryset(self):
+        queryset = CauseMembers.objects.all()
+        ids = self.request.QUERY_PARAMS.get('ids', None)
+        if ids:
+            ids = ids.split(",")
+            ids = [int(id) for id in ids]
+            queryset = queryset.filter(pk__in=ids)
+        return queryset
+
+class CauseMemberUpdate(generics.RetrieveUpdateAPIView):
+    model = CauseMembers
+    serializer_class = CauseMemberSerializer
+    authentication_classes = (JSONWebTokenAuthentication, )
+    permission_classes = (permissions.IsAuthenticated, )
+    queryset = CauseMembers.objects.all()

@@ -10,8 +10,6 @@ from companies.models import Company, Product
 class CompanyList(generics.ListCreateAPIView):
     model = Company
     serializer_class = CompanySerializer
-    queryset = Company.objects.all()
-
     authentication_classes = (JSONWebTokenAuthentication, )
 
     def get_permissions(self):
@@ -19,6 +17,15 @@ class CompanyList(generics.ListCreateAPIView):
             return (permissions.AllowAny(), )
         else:
             return (permissions.IsAdminUser(), )
+
+    def get_queryset(self):
+        queryset = Company.objects.all()
+        ids = self.request.QUERY_PARAMS.get('ids', None)
+        if ids:
+            ids = ids.split(",")
+            ids = [int(id) for id in ids]
+            queryset = queryset.filter(pk__in=ids)
+        return queryset
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, partial=True)

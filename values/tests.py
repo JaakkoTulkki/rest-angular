@@ -48,6 +48,11 @@ class TestValues(APITestCase):
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data[1]['name'], 'Health')
 
+        #create a new value
+        Value.objects.create(name="consumerism", description='bliss')
+        response = client.get('/api/v1/values/?ids=1,2')
+        self.assertEqual(len(response.data), 2)
+
         slug1 = response.data[0]['slug']
         slug2 = response.data[1]['slug']
 
