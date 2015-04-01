@@ -129,6 +129,9 @@ class TestAccountDetail(APITestCase):
         response = obtain_jwt_token(request)
         self.token2 = response.data['token']
 
+        self.user3 = Account.objects.create_user(email="user3@kehko.com", username="user3", password="man")
+        self.user4 = Account.objects.create_user(email="user4@kehko.com", username="user4", password="man")
+
     def test_details(self):
         """
         tests whether you can see account details
@@ -174,15 +177,19 @@ class TestAccountDetail(APITestCase):
         response = client.put('/api/v1/users/accountDetail/', data)
         self.assertEqual(response.status_code, 403)
 
-        #right account, normal user updates with complete data
-        data = {'first_name': 'Fname', 'last_name': 'Lname', 'tagline': 'Life', 'password': 'man'}
+        #right account, normal user updates with complete data, add also couple of followers
+        user_pks = [self.user3.pk, self.user4.pk]
+        data = {'first_name': 'Fname', 'last_name': 'Lname', 'tagline': 'Life', 'password': 'man',
+                'followees': user_pks}
         user = self.normal_user
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.normal_token)
         response = client.put('/api/v1/users/accountDetail/', data)
-        print(response.data)
         self.assertEqual(response.status_code, 204)
 
         #make sure that the stuff was updated
         response = client.get('/api/v1/users/accountDetail/')
         self.assertEqual(response.data['tagline'], 'Life')
+        self.assertEqual(response.data['followees'], user_pks)
+        self.assertEqual(len(self.user3.account_set.all()), 1)
+

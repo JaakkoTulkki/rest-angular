@@ -32,6 +32,7 @@ class Account(AbstractBaseUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    followees = models.ManyToManyField('self', symmetrical=False, blank=True, null=True)
 
     objects = AccountManager()
     USERNAME_FIELD = 'email'
