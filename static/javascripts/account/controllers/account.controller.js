@@ -9,14 +9,20 @@
                 return $scope;
             }
             $scope.submitForm = function (email, fname, lname, password) {
-                //validate password
-                if(password != 'kana'){
-                    $scope.password = "";
-                    $scope.pwd_error = "Wrong password";
-                    return 0;
-                }
-                $scope.pwd_error = "";
+                //we are not yet going to check the password
                 //User , update account
+                console.log('updating account');
+                User.updateAccount(email, fname, lname, password).then(successFn, errorFn);
+                function successFn(){
+                    $scope.details = User.details;
+                    $scope.message = 'Account updated';
+                    return $scope;
+                }
+
+                function errorFn(){
+                    $scope.message = "Oops... Something went wrong, probably your password";
+                    return $scope;
+                }
 
             }
 

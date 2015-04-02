@@ -64,7 +64,21 @@
                 Authentication.logout();
             };
 
+            factory.updateAccount = function (email, fname, lname, password) {
+                var username = factory.getUsername();
+                return $http.put(SERVER.url + '/api/v1/users/' + username+"/", {
+                    email: email, first_name: fname, last_name: lname, password: password
+                }).then(successFn, errorFn);
 
+                function successFn(data){
+                    factory.details = data;
+                    return factory;
+                }
+
+                function errorFn(data){
+                    console.log('error in updating account');
+                }
+            };
             return factory;
         }])
 

@@ -1,0 +1,25 @@
+<h1>Hi, {{ username }}</h1>
+
+{{ following_companies }}
+<p>You are currently using Kehko as <b>{{ company_details.company_name }}</b> account owner.
+This means that when you like, follow or post something as a company, it will registered to
+{{ company_details.company_name }} account.</p>
+
+<h2>{{ company_details.company_name }}'s account information</h2>
+<ul>
+    <h4>Company name</h4>
+    <li>{{ company_details.company_name }}</li>
+
+    <h4>Other companies you are following</h4>
+    <li ng-repeat="company in following_companies">
+        {{ company }}
+    </li>
+
+</ul>
+
+
+details are : {{ details }}
+<!--
+{"id":12,"account_owner":1,"company_name":"ytyt","slug":"ytyt",
+"following_company":[],"following_user":[],"following_cause":[],"likes":0,"values":[]}
+-->

@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('kehko')
-        .service('RegisterInterceptor', ['$injector', '$location', function($injector, $location){
+        .service('RegisterInterceptor', ['$injector', '$location', '$q', function($injector, $location, $q){
             var RegisterInterceptor = {
                 request: function (config) {
                     //inject register
@@ -24,12 +24,13 @@
                         //inject Register
                         var Reg = $injector.get('Authentication');
                         //and delete token from localstorage
-                        Reg.deleteToken();
+                        //Reg.deleteToken();
                         //then redirect to login
                         $location.path('/login');
                     }
 
-                    return response;
+                    //return response;
+                    return $q.reject(response);
                 }
             };
 

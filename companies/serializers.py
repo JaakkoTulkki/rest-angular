@@ -10,13 +10,13 @@ class CompanySerializer(serializers.ModelSerializer):
     #account_owner = AccountSerializer()
     class Meta:
         model = Company
-        fields = ('account_owner', 'company_name', 'slug', 'following_company', 'following_user',
+        fields = ('id', 'account_owner', 'company_name', 'slug', 'following_company', 'following_user',
                   'following_cause', 'likes', 'values')
         read_only_fields = ('slug', )
 
     def create(self, validated_data):
-        account_owner = validated_data['account_owner']
-        company_name = validated_data['company_name']
+        account_owner = validated_data.get('account_owner')
+        company_name = validated_data.get('company_name')
         company = Company(account_owner=account_owner, company_name=company_name)
         company.save()
         return company

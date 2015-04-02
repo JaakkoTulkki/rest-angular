@@ -16,7 +16,7 @@ class CompanyList(generics.ListCreateAPIView):
         if self.request.method in permissions.SAFE_METHODS:
             return (permissions.AllowAny(), )
         else:
-            return (permissions.IsAdminUser(), )
+            return (permissions.IsAuthenticated(), )
 
     def get_queryset(self):
         queryset = Company.objects.all()
