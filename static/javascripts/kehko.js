@@ -7,6 +7,8 @@
         })
         .constant('SERVER', {
           // Local server
-          url: 'http://127.0.0.1:8000'
+          //url: 'http://127.0.0.1:8000
+          // url: 'http://kehko-dev.eu-gb.mybluemix.net'
+            url: 'http://'+window.location.host
         });
 }());

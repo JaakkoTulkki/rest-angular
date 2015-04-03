@@ -11,3 +11,4 @@ djangorestframework-jwt==1.4.0
 gunicorn==19.3.0
 six==1.9.0
 static3==0.5.1
+whitenoise==1.0.6
