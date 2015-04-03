@@ -33,6 +33,15 @@
                 factory.company_details = company;
             };
 
+            factory.getCompanyFollowingCompany = function(){
+                var slug = factory.company_details.slug;
+                return $http.get('/api/v1/companies/'+slug+'/following-companies/')
+                    .then(function (data) {
+                        factory.following_companies = data.data;
+                    });
+            };
+
+            /* we actually now have url to retrieve this information
             factory.getCompanyFollowingCompany = function () {
                 var slug = factory.company_details.slug;
                 return $http.get('/api/v1/companies/'+slug+'/')
@@ -40,10 +49,34 @@
                         factory.following_company_ids = data.data.following_company;
                         var company_ids = factory.following_company_ids;
                         company_ids = company_ids.join(",");
-                        return $http.get('/api/v1/companies/?ids='+company_ids);
+                        if(company_ids){
+                            return $http.get('/api/v1/companies/?ids='+company_ids);
+                        }
+                        return [];
                     }).then(function (data) {
                         factory.following_companies = data.data;
                     });
+            };
+            */
+            factory.getAssociatedCompanies = function () {
+                var id = User.getClaims['user_id'];
+                return getCompanies();
+                function getCompanies(){
+                    return $http.get('/api/v1/companies/').success(function (response) {
+                        var companies = [];
+                        for(var e= 0, len=response.length; e<len; e++){
+                            if(response[e]['account_owner'] == id){
+                                companies.push(response[e]);
+                            }
+                        }
+                        factory.companies = companies;
+                    });
+                }
+            };
+
+            factory.setAsCompany = function (companyJson) {
+                console.log('set as company', companyJson);
+                $window.localStorage.setItem('company', JSON.stringify(companyJson));
             };
 
 

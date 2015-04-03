@@ -22,6 +22,12 @@
                 }
             };
 
+            factory.getUserCauses = function (username) {
+                return $http.get('/api/v1/users/'+username+'/causes/').then(function (data) {
+                    console.log('got user causes');
+                    factory.userCauses = data.data;
+                });
+            };
 
             factory.getClaims = Authentication.parseJWT();
 

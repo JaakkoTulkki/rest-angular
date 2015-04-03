@@ -33,3 +33,6 @@ class Product(models.Model):
             # Newly created object, so set slug
             self.slug = slugify(self.owner.company_name + ' ' +self.name)
         super(Product, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together = (('owner', 'name'),)

@@ -1,0 +1,23 @@
+Hi, {{ hello }}
+
+<form ng-submit="submitForm(title, description, url)">
+        <div class="list">
+          <label class="item item-input">Cause Title</label>
+          <input type="text" ng-model="title" placeholder="Title">
+        </div>
+
+        <div class="list">
+          <label class="item item-input">Description</label>
+          <textarea ng-model="description"></textarea>
+        </div>
+
+        <div class="list">
+          <label class="item item-input">Optional url</label>
+          <input type="url" ng-model="url" placeholder="Url" ng-required="false" >
+        </div>
+
+        <div class="padding">
+          <button type="submit" class="button button-block button-positive">Create cause</button>
+        </div>
+
+</form>

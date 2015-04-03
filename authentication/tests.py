@@ -8,6 +8,8 @@ from rest_framework import status
 from authentication.models import Account
 from authentication.views import AccountDetail, AccountList
 
+from causes.models import Cause
+
 # Create your tests here.
 class TestLogin(APITestCase):
     def setUp(self):
@@ -192,4 +194,28 @@ class TestAccountDetail(APITestCase):
         self.assertEqual(response.data['tagline'], 'Life')
         self.assertEqual(response.data['followees'], user_pks)
         self.assertEqual(len(self.user3.account_set.all()), 1)
+
+class TestListCausesForUser(APITestCase):
+    def setUp(self):
+        #create user
+        self.user = Account.objects.create_superuser(email="abc@kehko.com", username="abc", password='abc')
+
+        #create second user
+        self.user2 = Account.objects.create_superuser(email="def@kehko.com", username="def", password='abc')
+
+
+    def test_listing_causes(self):
+        cause1 = Cause.objects.create(name="cause1", description="desc", creator=self.user)
+        cause1.save()
+        cause2 = Cause.objects.create(name="cause2", description="desc", creator=self.user2)
+        cause2.save()
+        cause2.followers.add(self.user)
+        cause2.save()
+
+        #now self.user is a member in two causes: the one he created and then as a follower in cause2
+
+        client = APIClient()
+        response = client.get('/api/v1/users/{}/causes/'.format('abc'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
 

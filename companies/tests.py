@@ -210,6 +210,7 @@ class TestCause(APITestCase):
         self.assertTrue(len(company2.following_company.all())==0)
         self.assertEqual(company2.comp_followees.all()[0], company)
 
+
         #did the following users went allright
         self.assertEqual(response.data['following_user'], [1, 2])
         #did the update go to db as well?
@@ -224,6 +225,11 @@ class TestCause(APITestCase):
         self.assertEqual(len(company.following_cause.all()), 1)
         cause = Cause.objects.get(pk=1)
         self.assertEqual([e.pk for e in cause.cause_comp_followees.all()], [1])
+
+        #make sure that the following url is also working
+        response = client.get('/api/v1/companies/{}/following-companies/'.format(self.test_slug))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
 
         #let's see if path works!
         data = {'following_company': [2]}

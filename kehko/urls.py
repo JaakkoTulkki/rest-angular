@@ -2,12 +2,13 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from kehko.views import IndexView
-from authentication.views import AccountList, AccountDetail, RestrictedView
+from authentication.views import AccountList, AccountDetail, RestrictedView, UserCauses
 from causes.views import CauseList, CauseDetail, CauseMemberCreate, CauseMemberUpdate
-from companies.views import CompanyList, CompanyDetail, ProductList, ProductDetail
+from companies.views import CompanyFollowingCompanies, CompanyList, CompanyDetail, ProductList, ProductDetail
 from values.views import ValueList, ValueDetail
 
 account_urls = patterns('',
+    url(r'^/(?P<username>[0-9a-zA-Z_-]+)/causes/$', UserCauses.as_view(), name='account-causes'),
     url(r'^/(?P<username>[0-9a-zA-Z_-]+)/$', AccountDetail.as_view(), name='account-detail'),
     url(r'^/$', AccountList.as_view(), name='account-list')
 )
@@ -24,6 +25,8 @@ cause_member_urls = patterns('',
 
 company_urls = patterns('',
     url(r'^/$', CompanyList.as_view(), name='company-list'),
+    url(r'^/(?P<slug>[0-9a-zA-Z_-]+)/following-companies/$', CompanyFollowingCompanies.as_view(),
+        name='company-following-company'),
     url(r'^/(?P<slug>[0-9a-zA-Z_-]+)/$', CompanyDetail.as_view(), name='company-detail'),
 )
 

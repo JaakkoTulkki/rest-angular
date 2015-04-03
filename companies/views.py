@@ -16,7 +16,7 @@ class CompanyList(generics.ListCreateAPIView):
         if self.request.method in permissions.SAFE_METHODS:
             return (permissions.AllowAny(), )
         else:
-            return (permissions.IsAuthenticated(), )
+            return (permissions.IsAuthenticated(), permissions.IsAdminUser(), )
 
     def get_queryset(self):
         queryset = Company.objects.all()
@@ -85,6 +85,21 @@ class CompanyDetail(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
+
+class CompanyFollowingCompanies(generics.ListAPIView):
+    model = Company
+    serializer_class = CompanySerializer
+    authentication_classes = (JSONWebTokenAuthentication, )
+    lookup_field = 'slug'
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (permissions.AllowAny(), )
+        else:
+            return (permissions.IsAdminUser(), )
+    def get_queryset(self):
+        company = Company.objects.get(slug=self.kwargs.get('slug'))
+        return company.following_company.all()
 
 class ProductList(generics.ListCreateAPIView):
     model = Product

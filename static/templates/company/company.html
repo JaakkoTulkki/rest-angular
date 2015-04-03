@@ -1,0 +1,7 @@
+<h2>Your user account is associated with the following companies:</h2>
+<ul>
+    <li ng-repeat="company in companies" ng-click="setAsCompany(company)">
+        <a href="/company/details">{{ company.company_name }}, click to choose as your company</a>
+    </li>
+
+</ul>

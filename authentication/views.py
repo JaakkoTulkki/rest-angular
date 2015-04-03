@@ -1,4 +1,7 @@
 from django.contrib.auth import update_session_auth_hash
+from django.db.models import Q
+
+from itertools import chain
 
 from rest_framework import generics, permissions
 from rest_framework import status
@@ -10,6 +13,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from authentication.serializers import AccountSerializer
 from authentication.models import Account
 
+from causes.models import Cause
+from causes.serializers import CauseSerializer
 
 from kehko.general_permissions import IsAccountOwner
 class RestrictedView(APIView):
@@ -93,4 +98,15 @@ class AccountDetail(generics.RetrieveUpdateAPIView):
             'message': 'Account could not be updated'
         }, status=status.HTTP_403_FORBIDDEN)
 
+class UserCauses(generics.ListAPIView):
+    serializer_class = CauseSerializer
+    #authentication_classes = (JSONWebTokenAuthentication, )
 
+    def get_permissions(self):
+        return (permissions.AllowAny(),)
+
+    def get_queryset(self):
+        user = Account.objects.get(username=self.kwargs.get('username'))
+        user_query = user.cause_following.all()
+        cause_query = Cause.objects.filter(creator=user)
+        return list(chain(user_query, cause_query))

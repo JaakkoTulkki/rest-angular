@@ -1,0 +1,7 @@
+<h1>Causes</h1>
+
+<ul>
+    <li ng-repeat="cause in causes">
+        <a href="/causes/details/{{ cause.slug }}">{{ cause.name }},  {{ cause.description }}</a>
+    </li>
+</ul>

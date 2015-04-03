@@ -18,10 +18,13 @@
     <div class="collapse navbar-collapse" id="kehko-nav">
       <ul class="nav navbar-nav pull-right">
       {% verbatim %}
-          is logged in = {{ vm.loggedIn }},
         <span ng-show="vm.loggedIn">
-            <li><a href="/account">Your Account</a></li>
+            <li><a href="/causes/add">Add Cause</a></li>
+            <li><a href="/causes">Causes</a></li>
+            <li><a href="/users/{{ vm.username }}">Your Account</a></li>
+            <li><a href="/account">Your Account Settings</a></li>
             <li><a href="/add-company">Add your company</a></li>
+            <li><a href="/company">Your associated companies</a></li>
             <li><a href="javascript:void(0)" ng-click="vm.logout()">Logout</a></li>
             <li>username = {{ vm.username }}</li>
         </span>

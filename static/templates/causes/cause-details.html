@@ -1,0 +1,8 @@
+Details of {{ cause.name }} cause.
+
+<ul>
+    <li>{{ cause.name }}</li>
+    <li>{{ cause.description }}</li>
+    <li>Following: {{ following }}</li>
+    <li ng-hide="following" ng-click="follow()">Click here to follow this cause</li>
+</ul>

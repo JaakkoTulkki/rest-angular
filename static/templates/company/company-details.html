@@ -1,6 +1,5 @@
 <h1>Hi, {{ username }}</h1>
 
-{{ following_companies }}
 <p>You are currently using Kehko as <b>{{ company_details.company_name }}</b> account owner.
 This means that when you like, follow or post something as a company, it will registered to
 {{ company_details.company_name }} account.</p>
@@ -12,7 +11,7 @@ This means that when you like, follow or post something as a company, it will re
 
     <h4>Other companies you are following</h4>
     <li ng-repeat="company in following_companies">
-        {{ company }}
+        {{ company.company_name }}
     </li>
 
 </ul>
