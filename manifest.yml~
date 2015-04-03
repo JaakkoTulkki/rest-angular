@@ -1,0 +1,10 @@
+applications:
+- disk_quota: 1024M
+  buildpack: python_buildpack
+  host: jaakko-test
+  name: jaakko-test
+  path: .
+  domain: eu-gb.mybluemix.net
+  instances: 1
+  memory: 128M
+  command: sh run.sh

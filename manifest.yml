@@ -1,0 +1,10 @@
+applications:
+- disk_quota: 1024M
+  buildpack: python_buildpack
+  host: kehko-dev
+  name: kehko-dev
+  path: .
+  domain: eu-gb.mybluemix.net
+  instances: 1
+  memory: 128M
+  command: sh run.sh
