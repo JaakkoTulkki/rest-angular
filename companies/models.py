@@ -25,7 +25,7 @@ class Company(models.Model):
         if not self.id:
             # Newly created object, so set slug
             self.slug = slugify(self.company_name)
-        super().save(*args, **kwargs)
+        super(Company, self).save(*args, **kwargs)
 
 
 class Product(models.Model):

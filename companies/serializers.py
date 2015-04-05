@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from companies.models import Company, Product
 from authentication.serializers import AccountSerializer
 
@@ -41,12 +42,39 @@ class CompanySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     values = ValueSerializer(many=True, required=False)
-    owner = CompanySerializer(required=False)
+    owner = CompanySerializer(required=True)
 
     class Meta:
+        #https://github.com/tomchristie/django-rest-framework/issues/2380
+        #The model serializer here is generating a UniqueTogetherValidator
+        # for item and board, although because board is a nested object it's
+        #  passing the dictionary of data for it rather than a primary key.
+        #in our case it's the owner(the company9 and name (of the product) -> cause has nested stuff
+        validators = []
         model = Product
         fields = ('owner', 'name', 'slug', 'description', 'price', 'values')
         read_only_fields = ('slug', )
+
+    def validate(self, attrs):
+        # Tom Christie:
+        # Ensure that a `Pin` with board_name=attrs['board']['name']
+        # and item=attrs['item'] does not already exist.
+        """
+        def validate(self, attrs):
+        # Tom Christie:
+        # Ensure that a `Pin` with board_name=attrs['board']['name']
+        # and item=attrs['item'] does not already exist.
+        print(attrs)
+        p = Product.objects.filter(name=attrs.get('name', None), owner=attrs.get('owner', None))
+        if p.exists():
+            msg = 'Custom error made by Tulkki: violating unique_together("name", "owner") '
+            raise AssertionError(msg)
+        return attrs
+
+        :param attrs:
+        :return:
+        """
+        return attrs
 
     def create(self, validated_data):
         owner = validated_data.get('owner')

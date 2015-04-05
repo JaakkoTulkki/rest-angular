@@ -129,9 +129,13 @@ class TestCause(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
 
         response = client.post('/api/v1/products/{}/'.format(self.test_slug), data)
-        self.assertEqual(response.data, 201)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['slug'], self.test_slug+'-soap')
-        self.assertEqual(response.data['owner']['name'], 'Test Company')
+        self.assertEqual(response.data['owner']['company_name'], 'Test Company')
+
+        #try to create again the same product
+        response = client.post('/api/v1/products/{}/'.format(self.test_slug), data)
+        self.assertEqual(response.status_code, 409)
 
         #create another product
         data = {'name': "Cheese",'description': "This is foo", 'price': 10}

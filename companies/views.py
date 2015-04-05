@@ -101,6 +101,7 @@ class CompanyFollowingCompanies(generics.ListAPIView):
         company = Company.objects.get(slug=self.kwargs.get('slug'))
         return company.following_company.all()
 
+
 class ProductList(generics.ListCreateAPIView):
     model = Product
     serializer_class = ProductSerializer
@@ -120,6 +121,13 @@ class ProductList(generics.ListCreateAPIView):
         serializer = self.serializer_class(data=request.data, partial=True)
         if serializer.is_valid():
             corp = Company.objects.get(slug=kwargs.get('company'))
+            #not the best place to do the validation but has to go here now
+            #check for uniqueness between product name and product owner
+            p = Product.objects.filter(owner=corp, name=request.data['name'])
+            if p.exists():
+                msg = 'Custom error made by Tulkki: violating unique_together("name", "owner") . ' \
+                      'Change the name of your product or update your current products'
+                return Response({'errors': msg}, status=status.HTTP_409_CONFLICT)
             serializer.save(owner=corp)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({
