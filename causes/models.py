@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.text import slugify
 # Create your models here.
-from kehko.models import KehkoModel
+from kehko.models import UniqueSlugMixin
 
-class Cause(KehkoModel, models.Model):
+class Cause(UniqueSlugMixin, models.Model):
     creator = models.ForeignKey('authentication.Account')
     name = models.CharField(max_length=100)
     sponsors = models.ManyToManyField('companies.Company')
@@ -15,6 +15,7 @@ class Cause(KehkoModel, models.Model):
     url = models.URLField(blank=True, null=True)
     likes = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    #followers, people following this cause => Jesus had followers, causes have followers
     followers = models.ManyToManyField('authentication.Account', related_name='cause_following')
 
 
@@ -27,5 +28,6 @@ class CauseMembers(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Joined Cause")
     updated_at = models.DateTimeField(auto_now=True)
     products = models.ManyToManyField('companies.Product')
+    mission_statement = models.TextField(null=True, blank=True)
     class Meta:
         unique_together = (('company', 'cause'),)

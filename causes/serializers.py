@@ -9,7 +9,7 @@ from values.serializers import ValueSerializer
 class CauseMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = CauseMembers
-        fields = ('id', 'company', 'cause', 'products',)
+        fields = ('id', 'company', 'cause', 'products', 'mission_statement')
         read_only_fields = ('id', )
 
     def update(self, instance, validated_data):

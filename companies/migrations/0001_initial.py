@@ -8,8 +8,8 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('values', '0001_initial'),
         ('causes', '0001_initial'),
+        ('values', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -17,17 +17,22 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Company',
             fields=[
-                ('id', models.AutoField(auto_created=True, verbose_name='ID', primary_key=True, serialize=False)),
-                ('full_name', models.CharField(max_length=100)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('company_name', models.CharField(unique=True, max_length=100)),
                 ('slug', models.SlugField(unique=True)),
+                ('about', models.TextField(null=True, blank=True)),
+                ('founded', models.DateField(null=True, blank=True)),
+                ('country', models.CharField(null=True, max_length=100, blank=True)),
+                ('description', models.TextField(null=True, blank=True)),
+                ('mission', models.TextField(null=True, blank=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('is_active', models.BooleanField(default=True)),
                 ('likes', models.IntegerField(default=0)),
                 ('account_owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('following_campaign', models.ManyToManyField(to='causes.Cause', related_name='cause_followees')),
-                ('following_company', models.ManyToManyField(to='companies.Company', related_name='comp_followees')),
-                ('following_user', models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name='user_followees')),
+                ('following_cause', models.ManyToManyField(null=True, to='causes.Cause', related_name='cause_comp_followees', blank=True)),
+                ('following_company', models.ManyToManyField(null=True, to='companies.Company', related_name='comp_followees', blank=True)),
+                ('following_user', models.ManyToManyField(null=True, to=settings.AUTH_USER_MODEL, related_name='user_comp_followees', blank=True)),
                 ('values', models.ManyToManyField(to='values.Value')),
             ],
             options={
@@ -37,10 +42,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Product',
             fields=[
-                ('id', models.AutoField(auto_created=True, verbose_name='ID', primary_key=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('name', models.TextField(max_length=100)),
                 ('slug', models.SlugField(unique=True)),
-                ('description', models.TextField()),
+                ('description', models.TextField(null=True, blank=True)),
                 ('price', models.FloatField()),
                 ('owner', models.ForeignKey(to='companies.Company', related_name='products')),
                 ('values', models.ManyToManyField(to='values.Value')),
@@ -48,5 +53,9 @@ class Migration(migrations.Migration):
             options={
             },
             bases=(models.Model,),
+        ),
+        migrations.AlterUniqueTogether(
+            name='product',
+            unique_together=set([('owner', 'name')]),
         ),
     ]

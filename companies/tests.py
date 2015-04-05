@@ -116,8 +116,8 @@ class TestCause(APITestCase):
 
     def test_product(self):
         client = APIClient()
-        data = {'name': "Soap", 'slug': 'soap', 'description': "Keeps you clean",
-                'price': 100}
+        data = {'name': "Soap", 'description': "Keeps you clean",
+                'price': '100'}
 
         #try to create the product as normal user
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
@@ -127,10 +127,11 @@ class TestCause(APITestCase):
 
         #create  as admin
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        response = client.post('/api/v1/products/test-company/', data)
-        self.assertEqual(response.status_code, 201)
+
+        response = client.post('/api/v1/products/{}/'.format(self.test_slug), data)
+        self.assertEqual(response.data, 201)
         self.assertEqual(response.data['slug'], self.test_slug+'-soap')
-        self.assertEqual(response.data['owner']['company_name'], 'Test Company')
+        self.assertEqual(response.data['owner']['name'], 'Test Company')
 
         #create another product
         data = {'name': "Cheese",'description': "This is foo", 'price': 10}

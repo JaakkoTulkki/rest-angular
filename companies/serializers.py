@@ -6,12 +6,11 @@ from values.serializers import ValueSerializer
 
 class CompanySerializer(serializers.ModelSerializer):
     values = ValueSerializer(many=True, required=False)
-    #following_user = AccountSerializer(many=True)
-    #account_owner = AccountSerializer()
     class Meta:
         model = Company
         fields = ('id', 'account_owner', 'company_name', 'slug', 'following_company', 'following_user',
-                  'following_cause', 'likes', 'values')
+                  'following_cause', 'likes', 'values', 'about', 'founded', 'country', 'description',
+                  'mission')
         read_only_fields = ('slug', )
 
     def create(self, validated_data):
@@ -42,14 +41,15 @@ class CompanySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     values = ValueSerializer(many=True, required=False)
-    owner = CompanySerializer()
+    owner = CompanySerializer(required=False)
+
     class Meta:
         model = Product
         fields = ('owner', 'name', 'slug', 'description', 'price', 'values')
         read_only_fields = ('slug', )
 
     def create(self, validated_data):
-        owner = validated_data['owner']
+        owner = validated_data.get('owner')
         name = validated_data['name']
         description = validated_data['description']
         price = validated_data['price']

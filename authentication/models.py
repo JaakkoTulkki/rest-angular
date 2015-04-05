@@ -26,13 +26,19 @@ class Account(AbstractBaseUser):
     username = models.CharField(max_length=40, unique=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
     tagline = models.CharField(max_length=140, blank=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    #followees => the people who this person is following
     followees = models.ManyToManyField('self', symmetrical=False, blank=True, null=True)
+    liked_products = models.ManyToManyField('companies.Product', blank=True, null=True)
+    liked_companies = models.ManyToManyField('companies.Company', blank=True, null=True)
+    liked_causes = models.ManyToManyField('causes.Cause', blank=True, null=True)
 
     objects = AccountManager()
     USERNAME_FIELD = 'email'

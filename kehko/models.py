@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 
-class KehkoModel():
+class UniqueSlugMixin():
     def save(self, *args, **kwargs):
         if not self.id:
             # Newly created object, so set slug
