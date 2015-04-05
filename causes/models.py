@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.text import slugify
 # Create your models here.
+from kehko.models import KehkoModel
 
-
-class Cause(models.Model):
+class Cause(KehkoModel, models.Model):
     creator = models.ForeignKey('authentication.Account')
     name = models.CharField(max_length=100)
     sponsors = models.ManyToManyField('companies.Company')
@@ -17,11 +17,6 @@ class Cause(models.Model):
     is_active = models.BooleanField(default=True)
     followers = models.ManyToManyField('authentication.Account', related_name='cause_following')
 
-    def save(self, *args, **kwargs):
-        if not self.id:
-            # Newly created object, so set slug
-            self.slug = slugify(self.name)
-        super(Cause, self).save(*args, **kwargs)
 
 class CauseMembers(models.Model):
     """
