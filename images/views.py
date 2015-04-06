@@ -18,6 +18,7 @@ class ImageList(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, partial=True, context={'uploader': request.user})
         if serializer.is_valid():
+            serializer.save()
             return Response({'message': "Image uploaded"}, status=status.HTTP_201_CREATED)
         return Response({
             'status': "Bad request",

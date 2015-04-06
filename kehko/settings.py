@@ -68,6 +68,7 @@ INSTALLED_APPS = (
     'compressor',
     'news',
     'images',
+    'storages',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -115,6 +116,17 @@ USE_L10N = True
 
 USE_TZ = True
 
+#use S3
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_S3_SECURE_URLS = False       # use http instead of https
+AWS_QUERYSTRING_AUTH = False     # don't add complex authentication-related query parameters for requests
+AWS_STORAGE_BUCKET_NAME = "kehko-dev"
+S3_URL = 'http://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'
+MEDIA_URL = S3_URL
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEHKO_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_KEHKO_ACCESS_KEY')
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
@@ -129,16 +141,11 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 )
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+#we could use this but for now we are using S3
+#STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Allow all host headers
-
-AWS_STORAGE_BUCKET_NAME = "kehko-dev"
-S3_URL = 'http://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'
-IMAGE_URL = S3_URL
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEHKO_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_KEHKO_ACCESS_KEY')
