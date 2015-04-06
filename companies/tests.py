@@ -1,4 +1,4 @@
-from rest_framework.test import APIClient,APIRequestFactory, APITestCase, force_authenticate
+from rest_framework.test import APIClient, APIRequestFactory, APITestCase, force_authenticate
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework import status
 

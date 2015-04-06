@@ -74,6 +74,7 @@ class ProductSerializer(serializers.ModelSerializer):
         :param attrs:
         :return:
         """
+        print('context = ', self.context)
         return attrs
 
     def create(self, validated_data):

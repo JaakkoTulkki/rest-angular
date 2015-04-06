@@ -66,6 +66,7 @@ INSTALLED_APPS = (
     'values',
     'rest_framework',
     'compressor',
+    'news',
 )
 
 MIDDLEWARE_CLASSES = (

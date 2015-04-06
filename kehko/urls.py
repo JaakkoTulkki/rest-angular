@@ -5,6 +5,7 @@ from kehko.views import IndexView
 from authentication.views import AccountList, AccountDetail, RestrictedView, UserCauses
 from causes.views import CauseList, CauseDetail, CauseMemberCreate, CauseMemberUpdate
 from companies.views import CompanyFollowingCompanies, CompanyList, CompanyDetail, ProductList, ProductDetail
+from news.views import NewsList
 from values.views import ValueList, ValueDetail
 
 account_urls = patterns('',
@@ -30,6 +31,10 @@ company_urls = patterns('',
     url(r'^/(?P<slug>[0-9a-zA-Z_-]+)/$', CompanyDetail.as_view(), name='company-detail'),
 )
 
+news_urls = patterns('',
+    url(r'^/$', NewsList.as_view(), name='news-list'),
+)
+
 product_urls = patterns('',
     url(r'^/(?P<company>[0-9a-zA-Z_-]+)/$', ProductList.as_view(), name='product-list'),
     url(r'^/(?P<company>[0-9a-zA-Z_-]+)/(?P<product>[0-9a-zA-Z_-]+)/$', ProductDetail.as_view(), name='product-detail')
@@ -45,6 +50,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/causes', include(cause_urls)),
     url(r'^api/v1/cause-members', include(cause_member_urls)),
     url(r'^api/v1/companies', include(company_urls)),
+    url(r'^api/v1/news', include(news_urls)),
     url(r'^api/v1/products', include(product_urls)),
     url(r'^api/v1/users', include(account_urls)),
     url(r'^api/v1/values', include(value_urls)),

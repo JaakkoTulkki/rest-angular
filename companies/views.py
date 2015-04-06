@@ -118,7 +118,7 @@ class ProductList(generics.ListCreateAPIView):
         return Product.objects.filter(owner__slug=self.kwargs.get('company'))
 
     def create(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, partial=True)
+        serializer = self.serializer_class(data=request.data, partial=True, context={'corp':kwargs.get('company')})
         if serializer.is_valid():
             corp = Company.objects.get(slug=kwargs.get('company'))
             #not the best place to do the validation but has to go here now
