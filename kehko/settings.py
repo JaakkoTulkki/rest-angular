@@ -67,6 +67,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'compressor',
     'news',
+    'images',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -130,9 +131,14 @@ STATICFILES_FINDERS = (
 )
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-
 TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Allow all host headers
+
+AWS_STORAGE_BUCKET_NAME = "kehko-dev"
+S3_URL = 'http://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'
+IMAGE_URL = S3_URL
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEHKO_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_KEHKO_ACCESS_KEY')
