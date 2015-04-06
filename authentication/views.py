@@ -62,7 +62,7 @@ class AccountList(generics.ListCreateAPIView):
             return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
         return Response({
             'status': "Bad request",
-            'message': 'Account could not be created'
+            'message': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
 
 

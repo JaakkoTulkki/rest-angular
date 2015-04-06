@@ -1,3 +1,5 @@
+import datetime
+
 from rest_framework.test import APIClient, APIRequestFactory, APITestCase, force_authenticate
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework import status
@@ -29,9 +31,15 @@ class TestCause(APITestCase):
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
 
         #create a company
-        data = {'company_name': 'Test Company'}
+        data = {'company_name': 'Test Company', 'about':"about", 'description':'desc',
+                'founded': datetime.date(1900, 1, 22), 'country': 'Spain'}
         response = client.post('/api/v1/companies/', data)
         self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['founded'], "1900-01-22")
+        self.assertEqual(response.data['country'], "Spain")
+        self.assertEqual(response.data['description'], "desc")
+        self.company_pk = response.data['id']
+
         self.company = Company.objects.get(company_name="Test Company")
         self.test_slug = response.data['slug']
         #another company
@@ -89,11 +97,14 @@ class TestCause(APITestCase):
 
         #now update as admin user
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        data = {'company_name': 'Corp Ltd.', 'slug': 'corp-ltd'}
+        data = {'company_name': 'Corp Ltd.', 'slug': 'corp-ltd', 'country': "Germany",
+                'following_company': self.company_pk}
         response = client.put('/api/v1/companies/{}/'.format(slug), data)
         self.assertEqual(response.status_code, 202)
         self.assertEqual(response.data['company_name'], "Corp Ltd.")
         self.assertEqual(response.data['slug'], slug)
+        self.assertEqual(response.data['country'], "Germany")
+        self.assertEqual(response.data['following_company'], [self.company_pk])
 
         #the slug should have stayed the same
         response = client.get('/api/v1/companies/{}/'.format(slug))

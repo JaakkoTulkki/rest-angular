@@ -1,3 +1,5 @@
+import datetime
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from rest_framework.test import APIClient, APIRequestFactory, APITestCase, force_authenticate
@@ -7,8 +9,8 @@ from rest_framework import status
 
 from authentication.models import Account
 from authentication.views import AccountDetail, AccountList
-
 from causes.models import Cause
+from companies.models import Company, Product
 
 # Create your tests here.
 class TestLogin(APITestCase):
@@ -25,6 +27,7 @@ class TestLogin(APITestCase):
         request = factory.post('/api/v1/auth/login/', {'email': 'user@kehko.com', 'password': 'man'})
         response = obtain_jwt_token(request)
         self.normal_token = response.data['token']
+
 
     def test_login(self):
         #success case
@@ -68,9 +71,15 @@ class TestAccountList(APITestCase):
         """
         factory = APIRequestFactory()
         view = AccountList.as_view()
-        ok_request = factory.post('/api/v1/users/', {'email': "anew@kehko.com", 'username': "kana", 'password': 'pass'})
+        dob = datetime.datetime.now() - datetime.timedelta(days=365)
+        #datetime.datetime.strftime(dob, "%c")
+        #dob = datetime.date.isoformat(dob)
+        data = {'email': "anew@kehko.com", 'username': "kana",
+                'password': 'pass', 'date_of_birth': datetime.date(2015, 1, 1)}
+        ok_request = factory.post('/api/v1/users/', data)
         response = view(ok_request)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['date_of_birth'], datetime.date(2015, 1, 1))
 
         #now incomplete data
         bad_request = factory.post('/api/v1/users/', {'email': "new@kehko.com", 'password': 'pass'})
@@ -134,6 +143,15 @@ class TestAccountDetail(APITestCase):
         self.user3 = Account.objects.create_user(email="user3@kehko.com", username="user3", password="man")
         self.user4 = Account.objects.create_user(email="user4@kehko.com", username="user4", password="man")
 
+        #create couple of companies
+        self.companyOne = Company.objects.create(account_owner=self.normal_user, company_name="xyz")
+        self.companyTwo = Company.objects.create(account_owner=self.user2, company_name="abc")
+
+        #a product for companyOne
+        self.productOne = Product.objects.create(owner=self.companyOne, name='chicken',
+                                                 description="tastes good", price=3.4)
+
+
     def test_details(self):
         """
         tests whether you can see account details
@@ -181,19 +199,25 @@ class TestAccountDetail(APITestCase):
 
         #right account, normal user updates with complete data, add also couple of followers
         user_pks = [self.user3.pk, self.user4.pk]
+        company_pks = [self.companyOne.pk, self.companyTwo.pk]
         data = {'first_name': 'Fname', 'last_name': 'Lname', 'tagline': 'Life', 'password': 'man',
-                'followees': user_pks}
+                'followees': user_pks, 'liked_companies': company_pks,
+                'liked_products': [self.productOne.pk], 'date_of_birth': datetime.date(2010, 10, 22)}
         user = self.normal_user
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.normal_token)
         response = client.put('/api/v1/users/accountDetail/', data)
         self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.data['liked_companies'], company_pks)
+        self.assertEqual(response.data['liked_products'], [self.productOne.pk])
+        self.assertEqual(response.data['date_of_birth'], '2010-10-22')
 
         #make sure that the stuff was updated
         response = client.get('/api/v1/users/accountDetail/')
         self.assertEqual(response.data['tagline'], 'Life')
         self.assertEqual(response.data['followees'], user_pks)
         self.assertEqual(len(self.user3.account_set.all()), 1)
+        self.assertEqual(self.normal_user.liked_products.all()[0], self.productOne)
 
 class TestListCausesForUser(APITestCase):
     def setUp(self):

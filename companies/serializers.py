@@ -17,13 +17,25 @@ class CompanySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         account_owner = validated_data.get('account_owner')
         company_name = validated_data.get('company_name')
+        founded = validated_data.get('founded')
+        country = validated_data.get('country')
+        about = validated_data.get('about')
+        description = validated_data.get('description')
         company = Company(account_owner=account_owner, company_name=company_name)
+        company.founded = founded
+        company.country = country
+        company.about = about
+        company.description = description
         company.save()
         return company
 
     def update(self, instance, validated_data):
         instance.account_owner = validated_data.get('account_owner', instance.account_owner)
         instance.company_name = validated_data.get('company_name', instance.company_name)
+        instance.founded = validated_data.get('founded', instance.founded)
+        instance.country = validated_data.get('country', instance.country)
+        instance.about = validated_data.get('about', instance.about)
+        instance.description = validated_data.get('description', instance.description)
         following_company = validated_data.get('following_company')
         if following_company:
             instance.save()
