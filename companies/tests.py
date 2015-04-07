@@ -146,7 +146,7 @@ class TestCause(APITestCase):
 
         #try to create again the same product
         response = client.post('/api/v1/products/{}/'.format(self.test_slug), data)
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 400)
 
         #create another product
         data = {'name': "Cheese",'description': "This is foo", 'price': 10}
@@ -185,7 +185,7 @@ class TestCause(APITestCase):
 
         #now let's update some product as asdmin
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        response = client.put('/api/v1/products/{0}/{1}/'.format(self.test_slug, self.test_slug+'-cheese'),
+        response = client.put('/api/v1/products/{}/{}/'.format(self.test_slug, self.test_slug+'-cheese'),
                               data)
         self.assertEqual(response.status_code, 202)
         product = Product.objects.get(slug=self.test_slug+'-cheese')

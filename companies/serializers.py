@@ -59,34 +59,23 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         #https://github.com/tomchristie/django-rest-framework/issues/2380
         #The model serializer here is generating a UniqueTogetherValidator
-        # for item and board, although because board is a nested object it's
-        #  passing the dictionary of data for it rather than a primary key.
-        #in our case it's the owner(the company9 and name (of the product) -> cause has nested stuff
+        #for Company's account_owner and Product's name
+        # due to some nested problems it is not validating correctly
+        #Thus we have to overwrite is and check for uniqueness in validate method
         validators = []
         model = Product
         fields = ('owner', 'name', 'slug', 'description', 'price', 'values')
         read_only_fields = ('slug', )
 
     def validate(self, attrs):
-        # Tom Christie:
-        # Ensure that a `Pin` with board_name=attrs['board']['name']
-        # and item=attrs['item'] does not already exist.
-        """
-        def validate(self, attrs):
-        # Tom Christie:
-        # Ensure that a `Pin` with board_name=attrs['board']['name']
-        # and item=attrs['item'] does not already exist.
-        print(attrs)
-        p = Product.objects.filter(name=attrs.get('name', None), owner=attrs.get('owner', None))
-        if p.exists():
-            msg = 'Custom error made by Tulkki: violating unique_together("name", "owner") '
-            raise AssertionError(msg)
-        return attrs
-
-        :param attrs:
-        :return:
-        """
-        print('context = ', self.context)
+        if self.context.get('method') == 'POST':
+            corp = Company.objects.get(slug=self.context.get('corp'))
+            #check for uniqueness between product name and product owner
+            p = Product.objects.filter(owner=corp, name=attrs['name'])
+            if p.exists():
+                msg = 'Custom error: violating unique_together("name", "owner") . ' \
+                      'Change the name of your product or update your current products'
+                raise serializers.ValidationError(msg)
         return attrs
 
     def create(self, validated_data):
