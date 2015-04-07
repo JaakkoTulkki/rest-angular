@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+import images.models
 from django.conf import settings
 
 
@@ -16,9 +17,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Image',
             fields=[
-                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
-                ('image', models.ImageField(upload_to='images')),
-                ('company', models.ForeignKey(null=True, blank=True, to='companies.Company')),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('name', models.CharField(max_length=160)),
+                ('image', models.ImageField(upload_to=images.models.Image.get_file_path)),
+                ('company', models.ForeignKey(blank=True, null=True, to='companies.Company')),
                 ('uploader', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={

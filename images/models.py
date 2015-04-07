@@ -10,9 +10,8 @@ class Image(models.Model):
         ext = filename.split('.')[-1]
         filename = "%s.%s" % (uuid.uuid4(), ext)
         return "new-photos/"+filename
-        # return os.path.join('home/jaakko/Desktop/', filename)
 
-    uploader = models.ForeignKey('authentication.Account', blank=True, null=True)
+    uploader = models.ForeignKey('authentication.Account')
     company = models.ForeignKey('companies.Company', blank=True, null=True)
-    name = models.CharField(max_length=160, blank=True, null=True)
+    name = models.CharField(max_length=160)
     image = models.ImageField(upload_to=get_file_path)

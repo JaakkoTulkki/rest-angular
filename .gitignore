@@ -5,3 +5,5 @@ dist
 bower_components
 ~.pyc
 __pycache__
+new-photos
+db.sqlite3
