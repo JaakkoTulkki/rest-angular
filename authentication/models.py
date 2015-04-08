@@ -26,6 +26,7 @@ class Account(AbstractBaseUser):
     username = models.CharField(max_length=40, unique=True)
     first_name = models.CharField(max_length=40, blank=True)
     last_name = models.CharField(max_length=40, blank=True)
+    profile_picture = models.ForeignKey('images.Image', blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
     tagline = models.CharField(max_length=140, blank=True)

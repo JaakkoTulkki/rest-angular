@@ -2,24 +2,29 @@ from rest_framework import serializers
 from authentication.models import Account
 from django.contrib.auth import update_session_auth_hash
 
+from images.serializers import ImageSerializer
+
 class AccountSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     confirm_password = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = Account
         fields = ('id', 'email', 'username', 'created_at', 'updated_at', 'followees',
                  'first_name', 'last_name', 'tagline', 'password', 'confirm_password', 'date_of_birth',
-                  'country', 'liked_products', 'liked_companies', 'liked_causes')
+                  'country', 'liked_products', 'liked_companies', 'liked_causes', 'profile_picture')
         read_only_fields = ('created_at', 'updated_at')
+
     def create(self, validated_data):
-        print(validated_data)
         return Account.objects.create_user(**validated_data)
+
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.tagline = validated_data.get('tagline', instance.tagline)
         instance.country = validated_data.get('country', instance.country)
         instance.date_of_birth = validated_data.get('date_of_birth', instance.date_of_birth)
+        instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
         followees = validated_data.get('followees')
         if followees:
             instance.save()

@@ -69,6 +69,7 @@ INSTALLED_APPS = (
     'news',
     'images',
     'storages',
+    'actions',
 )
 
 MIDDLEWARE_CLASSES = (

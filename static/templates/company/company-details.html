@@ -15,10 +15,34 @@ This means that when you like, follow or post something as a company, it will re
     </li>
 
 </ul>
+<br>
+
+<h2>Actions you have taken:</h2>
+
+
+
+<form ng-submit="submitAction(cause_pk, url)">
+        <div class="list">
+            <label class="item item-input">Cause pk here</label>
+            <!--<input type="text" ng-model="cause_pk" placeholder="Cause pk here">-->
+            <select ng-model="cause_pk">
+                <option ng-repeat="cause in causes" value="{{ cause.id }}">{{ cause.name }}</option>
+            </select>
+        </div>
+
+        <div class="list">
+          <label class="item item-input">Action url here</label>
+          <input type="url" ng-model="url" placeholder="Place url here">
+        </div>
+
+        <div class="padding">
+          <button type="submit" class="button button-block button-positive">Create action</button>
+        </div>
+
+</form>
 
 
 details are : {{ details }}
-<!--
-{"id":12,"account_owner":1,"company_name":"ytyt","slug":"ytyt",
-"following_company":[],"following_user":[],"following_cause":[],"likes":0,"values":[]}
--->
+<br>
+
+actions = {{ actions }}
