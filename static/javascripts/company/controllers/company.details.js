@@ -14,9 +14,6 @@
                         var slug = Company.company_details.slug;
 
                         $scope.submitAction = function (cause_pk, url) {
-                            console.log(cause_pk);
-                            console.log(url);
-                            console.log(slug);
                             Action.createAction(cause_pk, url, slug).then(successFn, errorFn);
                             function successFn(){
                                 console.log('success in company details');
@@ -25,14 +22,21 @@
                                 console.log('error in comapny details');
                             }
                         };
-                        //return $scope;
+
+                        Cause.getCauses().then(
+                            function () {
+                                $scope.causes = Cause.causes;
+                            }
+                        );
+
+                        Action.getCompanyActions(slug).then(
+                            function () {
+                                $scope.companyActions = Action.companyActions;
+                            }
+                        )
+
                     }
                 );
 
-                Cause.getCauses().then(
-                    function () {
-                        $scope.causes = Cause.causes;
-                    }
-                )
         }]);
 }());

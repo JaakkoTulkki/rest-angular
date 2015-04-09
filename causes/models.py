@@ -29,5 +29,11 @@ class CauseMembers(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     products = models.ManyToManyField('companies.Product')
     mission_statement = models.TextField(null=True, blank=True)
+
+    @property
+    def _cause_name(self):
+        return self.cause.name
+    cause_name = _cause_name
+
     class Meta:
         unique_together = (('company', 'cause'),)

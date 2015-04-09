@@ -26,9 +26,10 @@
             };
 
             factory.getCompanyActions = function (slug) {
+                console.log('slug = ', slug);
                 return $http.get('/api/v1/companies/'+slug+'/actions/').then(
                     function (data) {
-                        console.log('success getting actions');
+                        factory.companyActions = data.data;
                     },
                     function (data) {
                         console.log('error getting actions');

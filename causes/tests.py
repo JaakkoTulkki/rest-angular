@@ -6,6 +6,7 @@ from rest_framework import status
 from authentication.models import Account
 from causes.models import CauseMembers, Cause
 from companies.models import Company, Product
+from values.models import Value
 
 class TestCause(APITestCase):
     def setUp(self):
@@ -39,22 +40,26 @@ class TestCause(APITestCase):
         self.corporated_product3 = Product.objects.create(name="food", description="delicious stuff",
                                                          price=23, owner=self.corporated)
 
+        #create some values also
+        self.value1 = Value.objects.create(name="nature")
+        self.value2 = Value.objects.create(name="freedom!!")
+
     def test_create_cause_and_list(self):
         #we are not admin, thus not able to create cause
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.token)
-        data = {'name': 'NWO', 'description': 'NWO awaits!!'}
+        data = {'name': 'NWO', 'description': 'NWO awaits!!', 'values': [self.value1.pk, self.value2.pk]}
         response = client.post('/api/v1/causes/', data)
         self.assertEqual(response.status_code, 403)
 
         #now we are superuser -> should be able to create
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION='JWT ' + self.super_token)
-        data = {'name': 'NWO', 'description': 'NWO awaits!!'}
         response = client.post('/api/v1/causes/', data)
         #print(response.__dir__())
         #print(response.serialize())
         self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['values'], [self.value1.pk, self.value2.pk])
 
         #now check that it was saved correctly
         cause = Cause.objects.get(name='NWO')

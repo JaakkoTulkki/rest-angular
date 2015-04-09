@@ -70,4 +70,4 @@ class TestActions(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data[0]['url'], 'http://www.kehko.com')
-        self.assertEqual(response.data[0]['cause_member'], self.cause_member.pk)
+        self.assertEqual(response.data[0]['cause_member']['cause_name'], self.cause_member.cause.name)

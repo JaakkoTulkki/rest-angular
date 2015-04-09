@@ -1,48 +1,34 @@
-<h1>Hi, {{ username }}</h1>
+<div class="row"><h1>{{ company_details.company_name }}</h1></div>
 
-<p>You are currently using Kehko as <b>{{ company_details.company_name }}</b> account owner.
-This means that when you like, follow or post something as a company, it will registered to
-{{ company_details.company_name }} account.</p>
-
-<h2>{{ company_details.company_name }}'s account information</h2>
-<ul>
-    <h4>Company name</h4>
-    <li>{{ company_details.company_name }}</li>
-
-    <h4>Other companies you are following</h4>
-    <li ng-repeat="company in following_companies">
-        {{ company.company_name }}
-    </li>
-
-</ul>
-<br>
-
-<h2>Actions you have taken:</h2>
-
-
-
-<form ng-submit="submitAction(cause_pk, url)">
-        <div class="list">
-            <label class="item item-input">Cause pk here</label>
-            <!--<input type="text" ng-model="cause_pk" placeholder="Cause pk here">-->
-            <select ng-model="cause_pk">
-                <option ng-repeat="cause in causes" value="{{ cause.id }}">{{ cause.name }}</option>
-            </select>
+<div class="row">
+    <div class="col-xs-6">
+        <h1>Actions</h1>
+        <div ng-repeat="action in companyActions">
+            <strong>{{ action.cause_member.cause_name }}: </strong>
+            {{ action.url }}
         </div>
+    </div>
 
-        <div class="list">
-          <label class="item item-input">Action url here</label>
-          <input type="url" ng-model="url" placeholder="Place url here">
-        </div>
+    <div class="col-xs-4 col-xs-offset-2">
+        <form ng-submit="submitAction(cause_pk, url)">
+                <div class="list">
+                    <label class="item item-input">Choose your cause</label>
+                    <!--<input type="text" ng-model="cause_pk" placeholder="Cause pk here">-->
+                    <select ng-model="cause_pk">
+                        <option ng-repeat="cause in causes" value="{{ cause.id }}">{{ cause.name }}</option>
+                    </select>
+                </div>
 
-        <div class="padding">
-          <button type="submit" class="button button-block button-positive">Create action</button>
-        </div>
+                <div class="list">
+                  <label class="item item-input">Action url here</label>
+                  <input type="url" ng-model="url" placeholder="Place url here">
+                </div>
 
-</form>
+                <div class="padding">
+                  <button type="submit" class="button button-block button-positive">Create action</button>
+                </div>
 
+        </form>
+    </div>
 
-details are : {{ details }}
-<br>
-
-actions = {{ actions }}
+</div>

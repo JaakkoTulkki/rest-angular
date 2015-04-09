@@ -3,13 +3,13 @@ from causes.models import Cause, CauseMembers
 
 from authentication.models import Account
 from authentication.serializers import AccountSerializer
-from companies.serializers import CompanySerializer, ProductSerializer
 from values.serializers import ValueSerializer
+
 
 class CauseMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = CauseMembers
-        fields = ('id', 'company', 'cause', 'products', 'mission_statement')
+        fields = ('id', 'company', 'cause', 'products', 'mission_statement', 'cause_name')
         read_only_fields = ('id', )
 
     def update(self, instance, validated_data):
@@ -34,6 +34,9 @@ class CauseSerializer(serializers.ModelSerializer):
         name = validated_data['name']
         description = validated_data['description']
         cause = Cause(creator=creator, name=name, description=description)
+        values = validated_data.get('values', [])
+        cause.save()
+        cause.values.add(*values)
         cause.save()
         return cause
 
